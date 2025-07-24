@@ -1,17 +1,13 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Image } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
+import LanguageSelector from './LanguageSelector';
 
 const CustomHeader = () => {
   const navigation = useNavigation<any>();
 
   const handleMenuPress = () => {
     navigation.openDrawer();
-  };
-
-  const handleLanguagePress = () => {
-    // TODO: Open language selector modal/dropdown
-    console.log('Language selector pressed');
   };
 
   return (
@@ -32,13 +28,7 @@ const CustomHeader = () => {
         />
       </View>
       
-      <TouchableOpacity
-        style={styles.languageButton}
-        onPress={handleLanguagePress}
-        activeOpacity={0.7}
-      >
-        <Text style={styles.languageText}>🌐 EN</Text>
-      </TouchableOpacity>
+      <LanguageSelector style={styles.languageSelector} />
     </View>
   );
 };
@@ -80,15 +70,10 @@ const styles = StyleSheet.create({
     width: 160,
     height: 32,
   },
-  languageButton: {
+  languageSelector: {
     padding: 8,
     minWidth: 44,
     alignItems: 'center',
-  },
-  languageText: {
-    fontSize: 14,
-    fontWeight: '500',
-    color: '#2c3e50',
   },
 });
 

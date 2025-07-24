@@ -11,8 +11,8 @@ const FooterDemoScreen = () => {
     Alert.alert('Terms of Service', 'This would navigate to the Terms of Service screen or open a URL.');
   };
 
-  const handleLegalDisclaimer = () => {
-    Alert.alert('Legal Disclaimer', 'This would navigate to the Legal Disclaimer screen or open a URL.');
+  const handleCancelSubscription = () => {
+    Alert.alert('Cancel Subscription', 'This would navigate to the subscription management screen.');
   };
 
   return (
@@ -21,14 +21,18 @@ const FooterDemoScreen = () => {
       <View style={styles.content}>
         <Text style={styles.title}>Footer Demo</Text>
         <Text style={styles.subtitle}>
-          This screen demonstrates the Footer component at the bottom of the screen.
+          This screen demonstrates the updated Footer component at the bottom of the screen.
         </Text>
         <Text style={styles.description}>
-          The footer includes:
-          {'\n'}• Legal links (Privacy Policy, Terms of Service, Legal Disclaimer)
-          {'\n'}• Copyright information
-          {'\n'}• DocLexa logo on the right side
-          {'\n'}• Responsive layout using Flexbox
+          The simplified footer includes:
+          {'\n'}• Three evenly spaced links with line breaks
+          {'\n'}• Left: "Terms of Service" (split into two lines)
+          {'\n'}• Center: "Privacy Policy" (split into two lines)
+          {'\n'}• Right: "Cancel Subscription" (split into two lines)
+          {'\n'}• Exact same width and padding as the header
+          {'\n'}• Light gray background (#f2f2f2)
+          {'\n'}• Clean, minimalistic design
+          {'\n'}• Fully responsive layout
         </Text>
       </View>
 
@@ -36,7 +40,7 @@ const FooterDemoScreen = () => {
       <Footer
         onPrivacyPolicy={handlePrivacyPolicy}
         onTermsOfService={handleTermsOfService}
-        onLegalDisclaimer={handleLegalDisclaimer}
+        onCancelSubscription={handleCancelSubscription}
       />
     </View>
   );

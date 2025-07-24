@@ -1,22 +1,24 @@
 import React from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, Linking } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import { useTranslation } from 'react-i18next';
 
 interface FooterProps {
   onPrivacyPolicy?: () => void;
   onTermsOfService?: () => void;
-  onLegalDisclaimer?: () => void;
+  onCancelSubscription?: () => void;
 }
 
 const Footer: React.FC<FooterProps> = ({
   onPrivacyPolicy,
   onTermsOfService,
-  onLegalDisclaimer,
+  onCancelSubscription,
 }) => {
+  const { t } = useTranslation();
+
   const handlePrivacyPolicy = () => {
     if (onPrivacyPolicy) {
       onPrivacyPolicy();
     } else {
-      // Default behavior - could open a URL or navigate to a screen
       console.log('Privacy Policy clicked');
     }
   };
@@ -25,47 +27,43 @@ const Footer: React.FC<FooterProps> = ({
     if (onTermsOfService) {
       onTermsOfService();
     } else {
-      // Default behavior - could open a URL or navigate to a screen
       console.log('Terms of Service clicked');
     }
   };
 
-  const handleLegalDisclaimer = () => {
-    if (onLegalDisclaimer) {
-      onLegalDisclaimer();
+  const handleCancelSubscription = () => {
+    if (onCancelSubscription) {
+      onCancelSubscription();
     } else {
-      // Default behavior - could open a URL or navigate to a screen
-      console.log('Legal Disclaimer clicked');
+      console.log('Cancel Subscription clicked');
     }
   };
 
   return (
     <View style={styles.footer}>
-      <View style={styles.content}>
-        {/* Left side - Legal Links */}
-        <View style={styles.legalSection}>
-          <View style={styles.linksContainer}>
-            <TouchableOpacity onPress={handlePrivacyPolicy} style={styles.link}>
-              <Text style={styles.linkText}>Privacy Policy</Text>
-            </TouchableOpacity>
-            <TouchableOpacity onPress={handleTermsOfService} style={styles.link}>
-              <Text style={styles.linkText}>Terms of Service</Text>
-            </TouchableOpacity>
-            <TouchableOpacity onPress={handleLegalDisclaimer} style={styles.link}>
-              <Text style={styles.linkText}>Legal Disclaimer</Text>
-            </TouchableOpacity>
-          </View>
-          <Text style={styles.copyrightText}>
-            © 2024 DocLexa. All rights reserved.
-          </Text>
-        </View>
+      {/* Three evenly spaced links */}
+      <View style={styles.linksContainer}>
+        {/* Left link - Terms of Service */}
+        <TouchableOpacity onPress={handleTermsOfService} style={styles.link}>
+          <Text style={styles.linkText}>{t('termsOfService')}</Text>
+        </TouchableOpacity>
 
-        {/* Right side - DocLexa Logo */}
-        <View style={styles.logoSection}>
-          <View style={styles.logoContainer}>
-            <Text style={styles.logoText}>DocLexa</Text>
-          </View>
-        </View>
+        {/* Center link - Privacy Policy */}
+        <TouchableOpacity onPress={handlePrivacyPolicy} style={styles.link}>
+          <Text style={styles.linkText}>{t('privacyPolicy')}</Text>
+        </TouchableOpacity>
+
+        {/* Right link - Cancel Subscription */}
+        <TouchableOpacity onPress={handleCancelSubscription} style={styles.link}>
+          <Text style={styles.linkText}>{t('cancelSubscription')}</Text>
+        </TouchableOpacity>
+      </View>
+
+      {/* Copyright text */}
+      <View style={styles.copyrightContainer}>
+        <Text style={styles.copyrightText}>
+          © 2024 DocLexa. All rights reserved.
+        </Text>
       </View>
     </View>
   );
@@ -73,55 +71,45 @@ const Footer: React.FC<FooterProps> = ({
 
 const styles = StyleSheet.create({
   footer: {
-    backgroundColor: '#f5f5f5',
+    backgroundColor: '#f2f2f2',
     borderTopWidth: 1,
     borderTopColor: '#e0e0e0',
-    paddingVertical: 16,
-    paddingHorizontal: 20,
-    minHeight: 80,
-  },
-  content: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'flex-start',
-    flex: 1,
-  },
-  legalSection: {
-    flex: 1,
-    marginRight: 20,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
   },
   linksContainer: {
-    marginBottom: 8,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 12,
   },
   link: {
-    marginBottom: 4,
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 8,
+    paddingHorizontal: 4,
   },
   linkText: {
     color: '#007AFF',
-    fontSize: 14,
+    fontSize: 12,
     fontWeight: '500',
     textDecorationLine: 'underline',
+    textAlign: 'center',
+    lineHeight: 16,
+  },
+  copyrightContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingTop: 8,
+    borderTopWidth: 1,
+    borderTopColor: '#e0e0e0',
   },
   copyrightText: {
     color: '#666666',
-    fontSize: 12,
+    fontSize: 11,
     fontWeight: '400',
-  },
-  logoSection: {
-    alignItems: 'flex-end',
-    justifyContent: 'flex-start',
-  },
-  logoContainer: {
-    backgroundColor: '#007AFF',
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 6,
-  },
-  logoText: {
-    color: '#FFFFFF',
-    fontSize: 16,
-    fontWeight: 'bold',
-    letterSpacing: 0.5,
+    textAlign: 'center',
   },
 });
 
