@@ -13,11 +13,18 @@ import {
 } from 'react-native';
 import * as DocumentPicker from 'expo-document-picker';
 import * as ImagePicker from 'expo-image-picker';
+import * as FileSystem from 'expo-file-system';
 import { useTranslation } from 'react-i18next';
 import { Footer } from '../components';
 import { analyzeDocument } from '../lib/documentAnalysis';
 import { supabase } from '../lib/supabase';
-import { uploadFileToSupabase, uploadFileToSupabaseSimple, testUploadNoValidation } from '../lib/fileUpload';
+import { testUploadNoValidation } from '../lib/fileUpload';
+import WelcomeModal, { checkHasSeenWelcomeModal, resetWelcomeModal } from '../components/WelcomeModal';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
+import { logAnalysisEvent } from '../lib/supabase';
+import { fetchUserPlanInfo, getHomeScreenDisplayText, UserPlanInfo } from '../lib/planInfo';
+import { useAuth } from '../context/AuthContext';
 
 const { width } = Dimensions.get('window');
 
@@ -44,8 +51,71 @@ const HomeScreen = () => {
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
   const [chatInput, setChatInput] = useState<string>('');
   const [analysisError, setAnalysisError] = useState<string | null>(null);
+  const [showWelcomeModal, setShowWelcomeModal] = useState(false);
+
+  const [usage, setUsage] = useState<number | null>(null);
+  const [quota, setQuota] = useState<number | null>(null);
+  const [plan, setPlan] = useState<string | null>(null);
+  const [usageError, setUsageError] = useState<string | null>(null);
+  const [planInfo, setPlanInfo] = useState<UserPlanInfo | null>(null);
 
   const { t } = useTranslation();
+  const { user } = useAuth();
+
+  React.useEffect(() => {
+    (async () => {
+      console.log('🏠 HomeScreen: Checking for WelcomeModal...');
+      // Set language from AsyncStorage before showing WelcomeModal
+      const storedLang = await AsyncStorage.getItem('selectedLanguage');
+      console.log('🏠 HomeScreen: storedLang:', storedLang);
+      if (storedLang) {
+        const { i18n } = require('react-i18next');
+        if (i18n.language !== storedLang) {
+          await i18n.changeLanguage(storedLang);
+        }
+      }
+      const hasSeen = await checkHasSeenWelcomeModal();
+      console.log('🏠 HomeScreen: hasSeenWelcomeModal:', hasSeen);
+      if (!hasSeen) {
+        console.log('🏠 HomeScreen: Showing WelcomeModal');
+        setShowWelcomeModal(true);
+      } else {
+        console.log('🏠 HomeScreen: WelcomeModal already seen, not showing');
+        // For testing: uncomment the next line to force show the modal
+        // await resetWelcomeModal();
+        // setShowWelcomeModal(true);
+      }
+    })();
+  }, []);
+
+
+
+  // Fetch usage/quota on mount and after analysis
+  const fetchUsageInfo = React.useCallback(async () => {
+    setUsageError(null);
+    try {
+      if (!user?.id) {
+        setUsageError(t('planInfo.noUserFound'));
+        return;
+      }
+
+      const planInfo = await fetchUserPlanInfo(user.id);
+      setPlan(planInfo.planName);
+      setPlanInfo(planInfo);
+      
+      // Set quota for backward compatibility
+      setQuota(planInfo.remainingPages);
+      
+      console.log('📊 Plan info updated:', planInfo);
+    } catch (err) {
+      console.error('❌ Error in fetchUsageInfo:', err);
+      setUsageError(t('planInfo.errorLoadingPlanInfo'));
+    }
+  }, [user?.id, t]);
+
+  React.useEffect(() => {
+    fetchUsageInfo();
+  }, [fetchUsageInfo, analysisResult]);
 
   const handleUploadDocuments = async () => {
     try {
@@ -56,26 +126,38 @@ const HomeScreen = () => {
       });
 
       if (!result.canceled && result.assets) {
-        const newDocuments = result.assets.map((asset, index) => {
-          const timestamp = Date.now();
-          const originalName = asset.name || `Document ${index + 1}`;
+        // Check file sizes before adding to documents
+        const validDocuments: DocumentItem[] = [];
+        
+        for (const asset of result.assets) {
+          const isFileSizeValid = await checkFileSize(asset.uri);
+          if (!isFileSizeValid) {
+            Alert.alert(
+              t('alerts.fileTooLarge'),
+              t('alerts.fileSizeLimitExceeded')
+            );
+            continue; // Skip this file but continue with others
+          }
           
-          // Ensure the filename has a proper extension
+          const timestamp = Date.now();
+          const originalName = asset.name || `Document`;
           const fixedName = fixFileName(originalName, false);
           
-          return {
-            id: `doc_${timestamp}_${index}`,
+          validDocuments.push({
+            id: `doc_${timestamp}_${validDocuments.length}`,
             name: fixedName,
             type: 'pdf' as const,
             uri: asset.uri,
             size: asset.size,
-          };
-        });
+          });
+        }
 
-        setDocuments(prev => [...prev, ...newDocuments]);
+        if (validDocuments.length > 0) {
+          setDocuments(prev => [...prev, ...validDocuments]);
+        }
       }
     } catch (error) {
-      Alert.alert('Error', 'Failed to pick documents. Please try again.');
+      Alert.alert(t('alerts.error'), t('alerts.failedToPickDocuments'));
     }
   };
 
@@ -91,15 +173,24 @@ const HomeScreen = () => {
 
     const result = await ImagePicker.launchCameraAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      allowsEditing: true,
-      aspect: [4, 3],
-      quality: 0.8,
+      allowsEditing: false, // Auto-confirm photos
+      quality: 0.8, // Reduce file size
     });
 
     if (!result.canceled && result.assets[0]) {
-      const timestamp = Date.now();
       const asset = result.assets[0];
       
+      // Check file size before adding to documents
+      const isFileSizeValid = await checkFileSize(asset.uri);
+      if (!isFileSizeValid) {
+        Alert.alert(
+          t('alerts.fileTooLarge'),
+          t('alerts.fileSizeLimitExceeded')
+        );
+        return;
+      }
+      
+      const timestamp = Date.now();
       // Generate a reliable filename for camera photos
       // Don't rely on asset.fileName as it's often "image" or undefined on Android
       const cameraPhotoName = `photo_${timestamp}.jpg`;
@@ -127,15 +218,24 @@ const HomeScreen = () => {
 
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      allowsEditing: true,
-      aspect: [4, 3],
-      quality: 0.8,
+      allowsEditing: false, // Auto-confirm photos
+      quality: 0.8, // Reduce file size
     });
 
     if (!result.canceled && result.assets[0]) {
-      const timestamp = Date.now();
       const asset = result.assets[0];
       
+      // Check file size before adding to documents
+      const isFileSizeValid = await checkFileSize(asset.uri);
+      if (!isFileSizeValid) {
+        Alert.alert(
+          t('alerts.fileTooLarge'),
+          t('alerts.fileSizeLimitExceeded')
+        );
+        return;
+      }
+      
+      const timestamp = Date.now();
       // Ensure the filename has a proper extension for gallery images
       const originalName = asset.fileName || `Gallery Image`;
       const fixedName = fixFileName(originalName, true);
@@ -153,6 +253,21 @@ const HomeScreen = () => {
 
   const handleRemoveDocument = (id: string) => {
     setDocuments(prev => prev.filter(doc => doc.id !== id));
+  };
+
+  // Helper function to check file size (5MB limit)
+  const checkFileSize = async (uri: string): Promise<boolean> => {
+    try {
+      const fileInfo = await FileSystem.getInfoAsync(uri);
+      if (fileInfo.exists && fileInfo.size) {
+        const fileSizeInMB = fileInfo.size / (1024 * 1024);
+        return fileSizeInMB <= 5; // 5MB limit
+      }
+      return true; // If we can't get file info, allow it
+    } catch (error) {
+      console.error('Error checking file size:', error);
+      return true; // If there's an error, allow it
+    }
   };
 
   // Helper function to fix file names that don't have extensions
@@ -191,7 +306,7 @@ const HomeScreen = () => {
       const uploadResult = await testUploadNoValidation(doc.uri, fixedFileName);
       
       if (!uploadResult.success) {
-        Alert.alert('Upload Error', uploadResult.error || 'Failed to upload document.');
+        Alert.alert(t('alerts.uploadError'), uploadResult.error || t('alerts.failedToUploadDocument'));
         return undefined;
       }
       
@@ -200,7 +315,7 @@ const HomeScreen = () => {
       
     } catch (err: any) {
       console.error('Upload error:', err);
-      Alert.alert('Upload Error', err.message || 'Failed to upload document.');
+      Alert.alert(t('alerts.uploadError'), err.message || t('alerts.failedToUploadDocument'));
       return undefined;
     }
   };
@@ -208,7 +323,7 @@ const HomeScreen = () => {
   const handleStartAnalysis = async () => {
     setAnalysisError(null);
     if (documents.length === 0) {
-      Alert.alert('No Documents', 'Please upload or take photos of documents first.');
+      Alert.alert(t('alerts.noDocuments'), t('alerts.pleaseUploadDocumentsFirst'));
       return;
     }
     setIsAnalyzing(true);
@@ -229,7 +344,7 @@ const HomeScreen = () => {
         const uploadResult = await testUploadNoValidation(doc.uri, fixedFileName);
         if (!uploadResult.success || !uploadResult.publicUrl) {
           setIsAnalyzing(false);
-          Alert.alert('Upload Error', uploadResult.error || 'Failed to upload document.');
+          Alert.alert(t('alerts.uploadError'), uploadResult.error || t('alerts.failedToUploadDocument'));
           return;
         }
         publicUrl = uploadResult.publicUrl;
@@ -244,13 +359,22 @@ const HomeScreen = () => {
       });
       if (result.success) {
         setAnalysisResult(result.result || 'No result returned.');
+        // Log analysis event
+        try {
+          await logAnalysisEvent({
+            document_id: documents && documents.length > 0 ? String(documents[0].name) : null,
+            tokens_used: null // Set this if available
+          });
+        } catch (err) {
+          console.error('❌ Error logging analysis event:', err);
+        }
       } else {
-        setAnalysisError(result.error || 'Analysis failed.');
-        Alert.alert('Analysis Error', result.error || 'Analysis failed.');
+        setAnalysisError(result.error || t('alerts.analysisFailed'));
+        Alert.alert(t('alerts.analysisError'), result.error || t('alerts.analysisFailed'));
       }
     } catch (err: any) {
-      setAnalysisError(err.message || 'Analysis failed.');
-      Alert.alert('Analysis Error', err.message || 'Analysis failed.');
+      setAnalysisError(err.message || t('alerts.analysisFailed'));
+      Alert.alert(t('alerts.analysisError'), err.message || t('alerts.analysisFailed'));
     } finally {
       setIsAnalyzing(false);
     }
@@ -283,18 +407,22 @@ const HomeScreen = () => {
 
   // Footer handlers
   const handlePrivacyPolicy = () => {
-    Alert.alert('Privacy Policy', 'This would navigate to the Privacy Policy screen or open a URL.');
+    Alert.alert(t('alerts.privacyPolicy'), t('alerts.privacyPolicyMessage'));
   };
 
   const handleTermsOfService = () => {
-    Alert.alert('Terms of Service', 'This would navigate to the Terms of Service screen or open a URL.');
+    Alert.alert(t('alerts.termsOfService'), t('alerts.termsOfServiceMessage'));
   };
 
   const handleCancelSubscription = () => {
-    Alert.alert('Cancel Subscription', 'This would navigate to the subscription management screen.');
+    Alert.alert(t('alerts.cancelSubscription'), t('alerts.cancelSubscriptionMessage'));
   };
 
-
+  // Temporary test function to reset and show modal
+  const testShowModal = async () => {
+    await resetWelcomeModal();
+    setShowWelcomeModal(true);
+  };
 
   const renderDocumentItem = ({ item }: { item: DocumentItem }) => (
     <View style={styles.documentItem}>
@@ -323,13 +451,46 @@ const HomeScreen = () => {
 
   return (
     <View style={styles.container}>
-      <ScrollView style={styles.scrollView} contentContainerStyle={styles.contentContainer}>
+      <WelcomeModal visible={showWelcomeModal} onClose={() => setShowWelcomeModal(false)} />
+      <ScrollView
+        style={styles.scrollView}
+        contentContainerStyle={styles.contentContainer}
+        keyboardShouldPersistTaps="handled"
+      >
         {/* Header Section */}
         <View style={styles.headerSection}>
           <Text style={styles.title}>{t('title')}</Text>
-          <Text style={styles.subtitle}>
-            {t('subtitle')}
-          </Text>
+          <Text style={styles.subtitle}>{t('subtitle')}</Text>
+
+          {/* Plan and Usage Information */}
+          <View style={styles.usageCounterContainer}>
+            {usageError ? (
+              <Text style={styles.usageError}>{usageError}</Text>
+            ) : planInfo ? (
+              <>
+                <Text style={styles.planNameText}>
+                  {planInfo.planName}
+                </Text>
+                <Text style={styles.usageCounterText}>
+                  {getHomeScreenDisplayText(planInfo)}
+                </Text>
+              </>
+            ) : (
+              <Text style={styles.usageCounterText}>{t('planInfo.loadingPlanInfo')}</Text>
+            )}
+          </View>
+          {/* Temporary test button - remove after testing */}
+          <TouchableOpacity 
+            style={{ 
+              backgroundColor: '#ff6b6b', 
+              padding: 8, 
+              borderRadius: 8, 
+              marginTop: 10 
+            }} 
+            onPress={testShowModal}
+          >
+            <Text style={{ color: 'white', fontSize: 12 }}>Test Modal</Text>
+          </TouchableOpacity>
         </View>
 
         {/* Upload Buttons */}
@@ -391,12 +552,15 @@ const HomeScreen = () => {
 
         {/* Persistent Analysis Result Section */}
         <View style={styles.resultSection}>
-          <Text style={styles.sectionTitle}>{t('analysisResults')}</Text>
+          <Text style={styles.sectionTitle}>{t('analysisResults.title')}</Text>
           <View style={styles.resultContainer}>
             {isAnalyzing ? (
               <ActivityIndicator size="large" color="#3498db" style={{ marginVertical: 20 }} />
             ) : analysisResult ? (
-              <Text style={styles.resultText}>{analysisResult}</Text>
+              <>
+                <Text style={styles.resultText}>{analysisResult}</Text>
+
+              </>
             ) : analysisError ? (
               <Text style={[styles.resultText, { color: 'red' }]}>{analysisError}</Text>
             ) : (
@@ -720,6 +884,39 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '600',
     color: '#fff',
+  },
+
+  usageCounterContainer: {
+    marginTop: 8,
+    marginBottom: 8,
+    alignItems: 'center',
+  },
+  usageCounterText: {
+    fontSize: 14,
+    color: '#555',
+    fontWeight: '600',
+  },
+  usageCounterSubtle: {
+    fontSize: 12,
+    color: '#888',
+    marginTop: 2,
+  },
+  usageError: {
+    fontSize: 13,
+    color: '#b71c1c',
+    fontWeight: '500',
+  },
+  planNameText: {
+    fontSize: 16,
+    color: '#2c3e50',
+    fontWeight: 'bold',
+    marginBottom: 4,
+  },
+  remainingAnalysesText: {
+    fontSize: 12,
+    color: '#27ae60',
+    marginTop: 2,
+    fontWeight: '500',
   },
 
 });

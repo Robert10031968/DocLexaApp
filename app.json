@@ -7,7 +7,7 @@
     "icon": "./icon.png",
     "userInterfaceStyle": "light",
     "newArchEnabled": true,
-    "scheme": "doclexaapp",
+    "scheme": "doclexa",
     "owner": "rgoralczyk1003",
     "splash": {
       "image": "./assets/splash-icon.png",

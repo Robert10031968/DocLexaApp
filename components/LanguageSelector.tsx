@@ -10,6 +10,7 @@ import {
   ScrollView,
 } from 'react-native';
 import { useTranslation } from 'react-i18next';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 interface Language {
   code: string;
@@ -37,28 +38,47 @@ interface LanguageSelectorProps {
 
 const { width, height } = Dimensions.get('window');
 
+const LANGUAGE_KEY = 'selectedLanguage';
+
 const LanguageSelector: React.FC<LanguageSelectorProps> = ({ 
   style, 
   onLanguageChange 
 }) => {
-  const { i18n } = useTranslation();
+  const { i18n, t } = useTranslation();
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedLanguage, setSelectedLanguage] = useState(
     languages.find(lang => lang.code === i18n.language) || languages[0]
   );
 
-  const handleLanguageSelect = (language: Language) => {
+  // On mount, read selected language from AsyncStorage
+  React.useEffect(() => {
+    (async () => {
+      const storedLang = await AsyncStorage.getItem(LANGUAGE_KEY);
+      if (storedLang && storedLang !== i18n.language) {
+        const langObj = languages.find(l => l.code === storedLang);
+        if (langObj) {
+          setSelectedLanguage(langObj);
+          await i18n.changeLanguage(langObj.code);
+          if (onLanguageChange) onLanguageChange(langObj.code);
+        }
+      }
+    })();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const handleLanguageSelect = async (language: Language) => {
     setSelectedLanguage(language);
     setModalVisible(false);
-    
-    i18n.changeLanguage(language.code).then(() => {
+    try {
+      await i18n.changeLanguage(language.code);
+      await AsyncStorage.setItem(LANGUAGE_KEY, language.code);
       if (onLanguageChange) {
         onLanguageChange(language.code);
       }
-    }).catch((error) => {
-      Alert.alert('Error', 'Failed to change language. Please try again.');
+    } catch (error) {
+              Alert.alert(t('alerts.error'), t('languageSelector.failedToChangeLanguage'));
       console.error('Language change error:', error);
-    });
+    }
   };
 
   const handleModalClose = () => {

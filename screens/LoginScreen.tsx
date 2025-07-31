@@ -10,10 +10,10 @@ import {
   KeyboardAvoidingView,
   Platform,
   ScrollView,
+  Image,
 } from 'react-native';
 import { useAuth } from '../context/AuthContext';
 import { useTranslation } from 'react-i18next';
-import OAuthDebugger from '../components/OAuthDebugger';
 
 const LoginScreen = () => {
   const [email, setEmail] = useState('');
@@ -23,7 +23,6 @@ const LoginScreen = () => {
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
   const [forgotPassword, setForgotPassword] = useState(false);
-  const [showDebug, setShowDebug] = useState(false);
   
   const { signIn, signUp, signInWithGoogle, resetPassword } = useAuth();
   const { t } = useTranslation();
@@ -34,7 +33,7 @@ const LoginScreen = () => {
 
   const handleAuth = async () => {
     if (!email || !password) {
-      Alert.alert('Error', 'Please fill in all fields');
+      Alert.alert(t('alerts.error'), t('login.pleaseFillAllFields'));
       return;
     }
 
@@ -46,55 +45,50 @@ const LoginScreen = () => {
         : await signIn(email, password);
 
       if (error) {
-        Alert.alert('Error', error.message);
+        Alert.alert(t('alerts.error'), error.message);
       } else if (isSignUp) {
         Alert.alert(
-          'Success', 
-          'Account created! Please check your email to verify your account.',
-          [{ text: 'OK' }]
+          t('login.signUp'), 
+          t('login.checkEmailToConfirm'),
+          [{ text: t('login.ok') }]
         );
       }
     } catch (error) {
-      Alert.alert('Error', 'An unexpected error occurred');
+      Alert.alert(t('alerts.error'), t('login.unexpectedError'));
     } finally {
       setLoading(false);
     }
   };
 
   const handleGoogleSignIn = async () => {
-    console.log('🔐 LoginScreen: Starting Google OAuth flow...');
     setGoogleLoading(true);
     
     try {
       const { error } = await signInWithGoogle();
       
       if (error) {
-        console.error('❌ LoginScreen: Google OAuth error:', error);
         Alert.alert(
-          'Google Sign-In Failed', 
-          error.message || 'Unable to sign in with Google. Please try again.',
-          [{ text: 'OK' }]
+          t('login.googleSignInFailed'), 
+          error.message || t('login.unableToSignInWithGoogle'),
+          [{ text: t('login.ok') }]
         );
-      } else {
-        console.log('✅ LoginScreen: Google OAuth initiated successfully');
-        // The browser should open automatically for OAuth flow
-        // The auth state change will handle navigation after successful login
       }
     } catch (error) {
-      console.error('❌ LoginScreen: Unexpected Google OAuth error:', error);
       Alert.alert(
-        'Error', 
-        'An unexpected error occurred during Google sign-in. Please try again.',
-        [{ text: 'OK' }]
+        t('alerts.error'), 
+        t('login.unexpectedErrorDuringGoogleSignIn'),
+        [{ text: t('login.ok') }]
       );
     } finally {
       setGoogleLoading(false);
     }
   };
 
+
+
   const handleForgotPassword = async () => {
     if (!email) {
-      Alert.alert('Error', 'Please enter your email address');
+      Alert.alert(t('alerts.error'), t('login.pleaseEnterEmail'));
       return;
     }
 
@@ -104,21 +98,23 @@ const LoginScreen = () => {
       const { error } = await resetPassword(email);
       
       if (error) {
-        Alert.alert('Error', error.message);
+        Alert.alert(t('alerts.error'), error.message);
       } else {
         Alert.alert(
-          'Success', 
-          'Password reset email sent! Please check your email.',
-          [{ text: 'OK' }]
+          t('login.resetPassword'), 
+          t('login.passwordResetSent'),
+          [{ text: t('login.ok') }]
         );
         setForgotPassword(false);
       }
     } catch (error) {
-      Alert.alert('Error', 'An unexpected error occurred');
+      Alert.alert(t('alerts.error'), t('login.unexpectedError'));
     } finally {
       setLoading(false);
     }
   };
+
+
 
   return (
     <KeyboardAvoidingView 
@@ -129,10 +125,13 @@ const LoginScreen = () => {
         <View style={styles.content}>
           {/* Logo/Header */}
           <View style={styles.header}>
-            <Text style={styles.logo}>📄</Text>
-            <Text style={styles.title}>DocLexa</Text>
+            <Image 
+              source={require('../assets/Doclexa.png')} 
+              style={styles.logo}
+              resizeMode="contain"
+            />
             <Text style={styles.subtitle}>
-              {isSignUp ? 'Create your account' : 'Welcome back'}
+              {isSignUp ? t('login.signUp') : t('login.signIn')}
             </Text>
           </View>
 
@@ -140,7 +139,7 @@ const LoginScreen = () => {
           <View style={styles.form}>
             <TextInput
               style={styles.input}
-              placeholder="Email"
+              placeholder={t('login.email')}
               value={email}
               onChangeText={setEmail}
               keyboardType="email-address"
@@ -152,7 +151,7 @@ const LoginScreen = () => {
               <View style={styles.passwordContainer}>
                 <TextInput
                   style={styles.passwordInput}
-                  placeholder="Password"
+                  placeholder={t('login.password')}
                   value={password}
                   onChangeText={setPassword}
                   secureTextEntry={!showPassword}
@@ -175,7 +174,7 @@ const LoginScreen = () => {
                 style={styles.forgotPassword}
                 onPress={() => setForgotPassword(true)}
               >
-                <Text style={styles.forgotPasswordText}>Forgot password?</Text>
+                <Text style={styles.forgotPasswordText}>{t('login.forgotPassword')}</Text>
               </TouchableOpacity>
             )}
 
@@ -190,10 +189,10 @@ const LoginScreen = () => {
               ) : (
                 <Text style={styles.authButtonText}>
                   {forgotPassword 
-                    ? 'Send Reset Email' 
+                    ? t('login.resetPassword')
                     : isSignUp 
-                      ? 'Sign Up' 
-                      : 'Sign In'
+                      ? t('login.signUp')
+                      : t('login.signIn')
                   }
                 </Text>
               )}
@@ -203,7 +202,7 @@ const LoginScreen = () => {
             {!forgotPassword && (
               <View style={styles.dividerContainer}>
                 <View style={styles.divider} />
-                <Text style={styles.dividerText}>or</Text>
+                <Text style={styles.dividerText}>{t('login.or')}</Text>
                 <View style={styles.divider} />
               </View>
             )}
@@ -221,18 +220,20 @@ const LoginScreen = () => {
                 ) : (
                   <>
                     <Text style={styles.googleIcon}>G</Text>
-                    <Text style={styles.googleButtonText}>Continue with Google</Text>
+                    <Text style={styles.googleButtonText}>{t('login.signInWithGoogle')}</Text>
                   </>
                 )}
               </TouchableOpacity>
             )}
+
+
           </View>
 
                       {/* Toggle between Sign In/Sign Up */}
             {!forgotPassword && (
               <View style={styles.toggleContainer}>
                 <Text style={styles.toggleText}>
-                  {isSignUp ? 'Already have an account?' : "Don't have an account?"}
+                  {isSignUp ? t('login.alreadyHaveAccount') : t('login.dontHaveAccount')}
                 </Text>
                 <TouchableOpacity
                   onPress={() => {
@@ -243,24 +244,11 @@ const LoginScreen = () => {
                   }}
                 >
                   <Text style={styles.toggleButton}>
-                    {isSignUp ? 'Sign In' : 'Sign Up'}
+                    {isSignUp ? t('login.signInHere') : t('login.signUpHere')}
                   </Text>
                 </TouchableOpacity>
               </View>
             )}
-
-            {/* Debug Button */}
-            <TouchableOpacity
-              style={styles.debugButton}
-              onPress={() => setShowDebug(!showDebug)}
-            >
-              <Text style={styles.debugButtonText}>
-                {showDebug ? 'Hide Debug' : 'Show Debug'}
-              </Text>
-            </TouchableOpacity>
-
-            {/* Debug Information */}
-            {showDebug && <OAuthDebugger />}
 
           {/* Back to Sign In from Forgot Password */}
           {forgotPassword && (
@@ -272,7 +260,7 @@ const LoginScreen = () => {
                   setShowPassword(false);
                 }}
               >
-                <Text style={styles.toggleButton}>Back to Sign In</Text>
+                <Text style={styles.toggleButton}>{t('login.signInHere')}</Text>
               </TouchableOpacity>
             </View>
           )}
@@ -297,16 +285,12 @@ const styles = StyleSheet.create({
   header: {
     alignItems: 'center',
     marginBottom: 40,
+    paddingTop: 20,
   },
   logo: {
-    fontSize: 60,
-    marginBottom: 16,
-  },
-  title: {
-    fontSize: 32,
-    fontWeight: 'bold',
-    color: '#2c3e50',
-    marginBottom: 8,
+    width: 200,
+    height: 120,
+    marginBottom: 24,
   },
   subtitle: {
     fontSize: 16,
@@ -462,6 +446,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '600',
   },
+
   debugButton: {
     backgroundColor: '#95a5a6',
     borderRadius: 8,

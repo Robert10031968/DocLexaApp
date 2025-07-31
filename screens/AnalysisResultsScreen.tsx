@@ -87,7 +87,7 @@ const AnalysisResultsScreen = () => {
 
   const handlePreviewPDF = async (analysis: AnalysisItem) => {
     if (!analysis.pdf_url) {
-      Alert.alert('No PDF Available', 'This analysis does not have a PDF file associated with it.');
+      Alert.alert(t('analysisResults.noPdfAvailable'), t('analysisResults.noPdfAvailableMessage'));
       return;
     }
     
@@ -99,7 +99,7 @@ const AnalysisResultsScreen = () => {
       const signedUrl = await getSignedUrl(analysis.pdf_url);
       setPdfUrl(signedUrl);
     } catch (error) {
-      Alert.alert('Error', 'Failed to load PDF. Please try again.');
+      Alert.alert(t('alerts.error'), t('analysisResults.failedToLoadPdf'));
       setPdfModalVisible(false);
     } finally {
       setPdfLoading(false);
@@ -108,7 +108,7 @@ const AnalysisResultsScreen = () => {
 
   const handleDownloadPDF = async (analysis: AnalysisItem) => {
     if (!analysis.pdf_url) {
-      Alert.alert('No PDF Available', 'This analysis does not have a PDF file associated with it.');
+      Alert.alert(t('analysisResults.noPdfAvailable'), t('analysisResults.noPdfAvailableMessage'));
       return;
     }
     
@@ -138,11 +138,11 @@ const AnalysisResultsScreen = () => {
               if (result && result.uri) {
                 Alert.alert('Success', `PDF downloaded to: ${result.uri}`);
               } else {
-                Alert.alert('Error', 'Download completed but file location is unknown.');
+                Alert.alert(t('alerts.error'), t('analysisResults.downloadCompletedUnknownLocation'));
               }
             } catch (error) {
               console.error('Download error:', error);
-              Alert.alert('Error', 'Failed to download PDF. Please try again.');
+              Alert.alert(t('alerts.error'), t('analysisResults.failedToDownloadPdf'));
             }
           },
         },
