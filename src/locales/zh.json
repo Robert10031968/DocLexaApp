@@ -125,6 +125,7 @@
     "ok": "确定"
   },
   "analysisResults": {
+    "title": "分析结果",
     "noPdfAvailable": "无可用PDF",
     "noPdfAvailableMessage": "此分析没有关联的PDF文件。",
     "failedToLoadPdf": "加载PDF失败。请重试。",

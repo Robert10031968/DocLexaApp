@@ -125,6 +125,7 @@
     "ok": "OK"
   },
   "analysisResults": {
+    "title": "Résultats de l'Analyse",
     "noPdfAvailable": "Aucun PDF disponible",
     "noPdfAvailableMessage": "Cette analyse n'a pas de fichier PDF associé.",
     "failedToLoadPdf": "Impossible de charger le PDF. Veuillez réessayer.",

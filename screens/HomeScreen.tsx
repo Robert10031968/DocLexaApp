@@ -19,7 +19,7 @@ import { Footer } from '../components';
 import { analyzeDocument } from '../lib/documentAnalysis';
 import { supabase } from '../lib/supabase';
 import { testUploadNoValidation } from '../lib/fileUpload';
-import WelcomeModal, { checkHasSeenWelcomeModal, resetWelcomeModal } from '../components/WelcomeModal';
+
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import { logAnalysisEvent } from '../lib/supabase';
@@ -51,7 +51,7 @@ const HomeScreen = () => {
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
   const [chatInput, setChatInput] = useState<string>('');
   const [analysisError, setAnalysisError] = useState<string | null>(null);
-  const [showWelcomeModal, setShowWelcomeModal] = useState(false);
+
 
   const [usage, setUsage] = useState<number | null>(null);
   const [quota, setQuota] = useState<number | null>(null);
@@ -62,31 +62,7 @@ const HomeScreen = () => {
   const { t } = useTranslation();
   const { user } = useAuth();
 
-  React.useEffect(() => {
-    (async () => {
-      console.log('🏠 HomeScreen: Checking for WelcomeModal...');
-      // Set language from AsyncStorage before showing WelcomeModal
-      const storedLang = await AsyncStorage.getItem('selectedLanguage');
-      console.log('🏠 HomeScreen: storedLang:', storedLang);
-      if (storedLang) {
-        const { i18n } = require('react-i18next');
-        if (i18n.language !== storedLang) {
-          await i18n.changeLanguage(storedLang);
-        }
-      }
-      const hasSeen = await checkHasSeenWelcomeModal();
-      console.log('🏠 HomeScreen: hasSeenWelcomeModal:', hasSeen);
-      if (!hasSeen) {
-        console.log('🏠 HomeScreen: Showing WelcomeModal');
-        setShowWelcomeModal(true);
-      } else {
-        console.log('🏠 HomeScreen: WelcomeModal already seen, not showing');
-        // For testing: uncomment the next line to force show the modal
-        // await resetWelcomeModal();
-        // setShowWelcomeModal(true);
-      }
-    })();
-  }, []);
+
 
 
 
@@ -418,11 +394,7 @@ const HomeScreen = () => {
     Alert.alert(t('alerts.cancelSubscription'), t('alerts.cancelSubscriptionMessage'));
   };
 
-  // Temporary test function to reset and show modal
-  const testShowModal = async () => {
-    await resetWelcomeModal();
-    setShowWelcomeModal(true);
-  };
+
 
   const renderDocumentItem = ({ item }: { item: DocumentItem }) => (
     <View style={styles.documentItem}>
@@ -451,7 +423,6 @@ const HomeScreen = () => {
 
   return (
     <View style={styles.container}>
-      <WelcomeModal visible={showWelcomeModal} onClose={() => setShowWelcomeModal(false)} />
       <ScrollView
         style={styles.scrollView}
         contentContainerStyle={styles.contentContainer}
@@ -479,18 +450,7 @@ const HomeScreen = () => {
               <Text style={styles.usageCounterText}>{t('planInfo.loadingPlanInfo')}</Text>
             )}
           </View>
-          {/* Temporary test button - remove after testing */}
-          <TouchableOpacity 
-            style={{ 
-              backgroundColor: '#ff6b6b', 
-              padding: 8, 
-              borderRadius: 8, 
-              marginTop: 10 
-            }} 
-            onPress={testShowModal}
-          >
-            <Text style={{ color: 'white', fontSize: 12 }}>Test Modal</Text>
-          </TouchableOpacity>
+
         </View>
 
         {/* Upload Buttons */}
@@ -658,6 +618,7 @@ const styles = StyleSheet.create({
     color: '#7f8c8d',
     textAlign: 'center',
     marginTop: 4,
+    marginBottom: 8,
   },
 
   uploadSection: {
@@ -887,7 +848,7 @@ const styles = StyleSheet.create({
   },
 
   usageCounterContainer: {
-    marginTop: 8,
+    marginTop: 20,
     marginBottom: 8,
     alignItems: 'center',
   },

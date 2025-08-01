@@ -125,6 +125,7 @@
     "ok": "OK"
   },
   "analysisResults": {
+    "title": "Kết quả Phân tích",
     "noPdfAvailable": "Không có PDF khả dụng",
     "noPdfAvailableMessage": "Phân tích này không có tệp PDF liên quan.",
     "failedToLoadPdf": "Không thể tải PDF. Vui lòng thử lại.",
