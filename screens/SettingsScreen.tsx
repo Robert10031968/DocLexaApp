@@ -14,7 +14,7 @@ import { fetchUserPlanInfo, formatDate, UserPlanInfo } from '../lib/planInfo';
 
 const SettingsScreen = () => {
   const { t } = useTranslation();
-  const { signOut, user } = useAuth();
+  const { user } = useAuth();
   const [planInfo, setPlanInfo] = useState<UserPlanInfo | null>(null);
   const [planError, setPlanError] = useState<string | null>(null);
   const [planPrice, setPlanPrice] = useState<string | null>(null);
@@ -147,30 +147,7 @@ const SettingsScreen = () => {
     }
   };
 
-  const handleLogout = () => {
-    Alert.alert(
-      t('settingsScreen.logout'),
-      t('settingsScreen.logoutConfirmation'),
-      [
-        {
-          text: t('cancel'),
-          style: 'cancel',
-        },
-        {
-          text: t('settingsScreen.logout'),
-          style: 'destructive',
-          onPress: async () => {
-            try {
-              await signOut();
-              // The AuthContext will handle the navigation automatically
-            } catch (error) {
-              Alert.alert(t('error'), t('settingsScreen.logoutError'));
-            }
-          },
-        },
-      ]
-    );
-  };
+  // Logout functionality moved to main navigation menu for better accessibility
 
   return (
     <ScrollView style={styles.container}>
@@ -196,17 +173,7 @@ const SettingsScreen = () => {
           </View>
         </View>
 
-        {/* Logout Section */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>{t('settingsScreen.actions')}</Text>
-          <TouchableOpacity
-            style={styles.logoutButton}
-            onPress={handleLogout}
-            activeOpacity={0.7}
-          >
-            <Text style={styles.logoutButtonText}>{t('settingsScreen.logout')}</Text>
-          </TouchableOpacity>
-        </View>
+        {/* Logout button moved to main navigation menu for better accessibility */}
       </View>
     </ScrollView>
   );

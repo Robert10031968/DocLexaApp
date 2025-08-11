@@ -133,5 +133,16 @@
   },
   "languageSelector": {
     "failedToChangeLanguage": "Failed to change language. Please try again."
+  },
+  "paste": {
+    "freeBanner": "You have {{available}} pages in your limit, the text is {{pages}} pages — we will analyze the whole text. {{free}} pages FREE 🎁",
+    "tooLarge": "The text exceeds the limit of {{max}} pages per document.",
+    "resultSummary": "We analyzed {{pages_total}} pages. {{pages_charged}} were charged, {{pages_free}} were FREE 🎁.",
+    "title": "Paste text",
+    "placeholder": "Paste your text here…",
+    "fromClipboard": "Paste from clipboard",
+    "analyze": "Analyze text",
+    "counters": "Chars: {{chars}} · Words: {{words}} · Estimated pages: {{pages}}",
+    "clipboardEmpty": "Clipboard is empty"
   }
 } 

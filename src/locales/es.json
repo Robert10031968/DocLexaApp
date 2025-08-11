@@ -130,9 +130,19 @@
     "noPdfAvailableMessage": "Este análisis no tiene un archivo PDF asociado.",
     "failedToLoadPdf": "Error al cargar PDF. Inténtalo de nuevo.",
     "downloadCompletedUnknownLocation": "Descarga completada pero la ubicación del archivo es desconocida.",
-    "failedToDownloadPdf": "Error al descargar PDF. Inténtalo de nuevo."
+    "failedToDownloadPdf": "Error al descargar PDF. Inténtalo de nuevo.",
+    "empty": "No se devolvió ningún resultado."
   },
   "languageSelector": {
     "failedToChangeLanguage": "Error al cambiar idioma. Inténtalo de nuevo."
+  },
+  "paste": {
+    "title": "Pegar texto",
+    "placeholder": "Pega tu texto aquí…",
+    "fromClipboard": "Pegar desde el portapapeles",
+    "analyze": "Analizar texto",
+    "counters": "Caracteres: {{chars}} · Palabras: {{words}} · Páginas estimadas: {{pages}}",
+    "clipboardEmpty": "El portapapeles está vacío",
+    "tooLarge": "El texto supera el número máximo de páginas por documento."
   }
 } 

@@ -130,9 +130,19 @@
     "noPdfAvailableMessage": "Diese Analyse hat keine zugehörige PDF-Datei.",
     "failedToLoadPdf": "PDF konnte nicht geladen werden. Bitte versuchen Sie es erneut.",
     "downloadCompletedUnknownLocation": "Download abgeschlossen, aber der Dateistandort ist unbekannt.",
-    "failedToDownloadPdf": "PDF konnte nicht heruntergeladen werden. Bitte versuchen Sie es erneut."
+    "failedToDownloadPdf": "PDF konnte nicht heruntergeladen werden. Bitte versuchen Sie es erneut.",
+    "empty": "Kein Ergebnis zurückgegeben."
   },
   "languageSelector": {
     "failedToChangeLanguage": "Sprache konnte nicht geändert werden. Bitte versuchen Sie es erneut."
+  },
+  "paste": {
+    "title": "Text einfügen",
+    "placeholder": "Fügen Sie hier Ihren Text ein…",
+    "fromClipboard": "Aus der Zwischenablage einfügen",
+    "analyze": "Text analysieren",
+    "counters": "Zeichen: {{chars}} · Wörter: {{words}} · Geschätzte Seiten: {{pages}}",
+    "clipboardEmpty": "Die Zwischenablage ist leer",
+    "tooLarge": "Der Text überschreitet die maximale Seitenzahl pro Dokument."
   }
 } 

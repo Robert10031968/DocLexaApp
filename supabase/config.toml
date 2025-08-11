@@ -1,0 +1,3 @@
+
+[functions.cleanup-expired-documents]
+verify_jwt = false

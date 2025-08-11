@@ -4,6 +4,7 @@ import { supabase } from './supabase';
 export interface UploadResult {
   success: boolean;
   publicUrl?: string;
+  storagePath?: string; // Full path in Supabase Storage bucket
   error?: string;
   retryCount?: number;
 }
@@ -746,48 +747,119 @@ export const testUploadFunctionality = async (
 }; 
 
 /**
- * Test upload function with no validation - for debugging
+ * Enhanced upload function optimized for React Native/Expo
+ * This function ensures reliable file uploads to Supabase Storage
+ * 
+ * Key features for React Native/Expo:
+ * - Uses expo-file-system for reliable file reading
+ * - Converts to Uint8Array for proper binary handling
+ * - Generates proper filenames with extensions
+ * - Includes detailed logging for debugging
+ * - Handles React Native specific URI formats
  */
 export const testUploadNoValidation = async (
   localUri: string,
   fileName: string,
   bucketName: string = 'documents'
 ): Promise<UploadResult> => {
+  const startTime = Date.now();
+  
   try {
-    console.log('🧪 TEST: Starting upload with NO validation');
-    console.log('📁 Filename:', fileName);
-    console.log('📁 URI:', localUri);
+    console.log('🚀 === UPLOAD START ===');
+    console.log('📁 Original filename:', fileName);
+    console.log('📁 File URI:', localUri);
+    console.log('📦 Target bucket:', bucketName);
     
-    // Check if file exists
+    // Step 1: Validate file exists
+    console.log('🔍 Step 1: Checking if file exists...');
     const fileInfo = await FileSystem.getInfoAsync(localUri);
-    console.log('📁 File info:', fileInfo);
+    console.log('📁 File info:', {
+      exists: fileInfo.exists,
+      size: fileInfo.exists ? fileInfo.size : 'N/A',
+      uri: fileInfo.uri
+    });
     
     if (!fileInfo.exists) {
+      console.log('❌ File does not exist at URI:', localUri);
       return { success: false, error: 'File does not exist' };
     }
     
-    // Generate upload path
+    if (!fileInfo.size || fileInfo.size === 0) {
+      console.log('❌ File is empty or size is 0');
+      return { success: false, error: 'File is empty' };
+    }
+    
+    console.log('✅ File validation passed');
+    
+    // Step 2: Generate proper filename with extension
+    console.log('🔍 Step 2: Processing filename...');
+    let finalFileName = fileName;
+    
+    // Remove any invalid characters and ensure proper extension
+    if (!fileName.includes('.')) {
+      // For React Native, detect image files and add .jpg extension
+      if (localUri.includes('image') || localUri.includes('photo') || 
+          localUri.includes('jpg') || localUri.includes('jpeg') || 
+          localUri.includes('png') || localUri.includes('camera')) {
+        finalFileName = `${fileName}.jpg`;
+        console.log('📝 Added .jpg extension for image file');
+      } else {
+        finalFileName = `${fileName}.pdf`;
+        console.log('📝 Added .pdf extension for document file');
+      }
+    }
+    
+    // Clean filename for URL safety
+    const cleanFileName = finalFileName.replace(/[^a-zA-Z0-9._-]/g, '_');
+    console.log('📁 Final filename:', cleanFileName);
+    
+    // Step 3: Generate upload path
+    console.log('🔍 Step 3: Generating upload path...');
     const timestamp = Date.now();
-    // Remove leading slash to prevent double slashes in URLs
-    const cleanedFileName = fileName.startsWith('/') ? fileName.slice(1) : fileName;
-    const filePath = `${timestamp}_${cleanedFileName}`;
-    const contentType = getMimeType(fileName);
+    const filePath = `${timestamp}_${cleanFileName}`;
+    const contentType = getMimeType(cleanFileName);
     
-    console.log('📤 Upload path:', filePath);
-    console.log('📤 Content type:', contentType);
+    console.log('📤 Upload details:', {
+      path: filePath,
+      contentType: contentType,
+      bucket: bucketName
+    });
     
-    // Read and upload
-    console.log('📖 Reading file...');
+    // Step 4: Read file as Base64 (most reliable for React Native)
+    console.log('🔍 Step 4: Reading file as Base64...');
+    console.log('📖 Reading from URI:', localUri);
+    
     const base64Data = await FileSystem.readAsStringAsync(localUri, {
       encoding: FileSystem.EncodingType.Base64,
     });
     
-    console.log('📦 Base64 size:', base64Data.length);
+    console.log('📦 Base64 data size:', base64Data.length, 'characters');
     
+    if (!base64Data || base64Data.length === 0) {
+      console.log('❌ Base64 data is empty');
+      return { success: false, error: 'Failed to read file data' };
+    }
+    
+    // Step 5: Convert Base64 to Uint8Array
+    console.log('🔍 Step 5: Converting Base64 to binary...');
     const binaryData = decode(base64Data);
-    console.log('📦 Binary size:', binaryData.length);
+    console.log('📦 Binary data size:', binaryData.length, 'bytes');
     
-    console.log('📤 Uploading to Supabase...');
+    if (binaryData.length === 0) {
+      console.log('❌ Binary data is empty');
+      return { success: false, error: 'Failed to convert file to binary' };
+    }
+    
+    // Step 6: Upload to Supabase Storage
+    console.log('🔍 Step 6: Uploading to Supabase Storage...');
+    console.log('📤 Upload parameters:', {
+      bucket: bucketName,
+      path: filePath,
+      contentType: contentType,
+      dataSize: binaryData.length
+    });
+    
+    const uploadStartTime = Date.now();
     const { error: uploadError } = await supabase.storage
       .from(bucketName)
       .upload(filePath, binaryData, {
@@ -796,34 +868,103 @@ export const testUploadNoValidation = async (
         upsert: false,
       });
     
+    const uploadDuration = Date.now() - uploadStartTime;
+    console.log('⏱️ Upload duration:', uploadDuration, 'ms');
+    
     if (uploadError) {
-      console.error('❌ Upload error:', uploadError);
+      console.error('❌ Upload failed with error:', uploadError);
+      console.error('❌ Error message:', uploadError.message);
+      console.error('❌ Error details:', uploadError);
       return { success: false, error: `Upload failed: ${uploadError.message}` };
     }
     
-    // Get public URL
+    console.log('✅ Upload completed successfully');
+    
+    // Step 7: Get public URL
+    console.log('🔍 Step 7: Getting public URL...');
     const { data: publicUrlData } = supabase.storage
       .from(bucketName)
       .getPublicUrl(filePath);
     
     if (!publicUrlData?.publicUrl) {
-      return { success: false, error: 'No public URL' };
+      console.log('❌ Failed to generate public URL');
+      return { success: false, error: 'Failed to generate public URL' };
     }
     
-    console.log('✅ TEST upload successful!');
-    console.log('🔗 URL:', publicUrlData.publicUrl);
+    const totalDuration = Date.now() - startTime;
+    console.log('✅ === UPLOAD SUCCESS ===');
+    console.log('🔗 Public URL:', publicUrlData.publicUrl);
+    console.log('📁 File size uploaded:', binaryData.length, 'bytes');
+    console.log('⏱️ Total duration:', totalDuration, 'ms');
+    console.log('📤 File path in storage:', filePath);
     
     return { 
       success: true, 
       publicUrl: publicUrlData.publicUrl,
+      storagePath: filePath, // Return the storage path for deletion
       retryCount: 0
     };
+    
   } catch (error: any) {
-    console.error('❌ TEST upload failed:', error);
+    const totalDuration = Date.now() - startTime;
+    console.error('❌ === UPLOAD FAILED ===');
+    console.error('❌ Error message:', error.message);
+    console.error('❌ Error stack:', error.stack);
+    console.error('⏱️ Duration before failure:', totalDuration, 'ms');
+    
     return { 
       success: false, 
-      error: `Test upload error: ${error.message}`,
+      error: `Upload error: ${error.message}`,
       retryCount: 0
     };
   }
 }; 
+
+/**
+ * Delete a file from Supabase Storage
+ * This function removes the file from the specified bucket using the storage path
+ * 
+ * @param storagePath - The full path of the file in the bucket (e.g., "12345_photo.jpg")
+ * @param bucketName - The bucket name (default: 'documents')
+ * @returns Promise<{success: boolean, error?: string}>
+ */
+export const deleteFileFromSupabase = async (
+  storagePath: string,
+  bucketName: string = 'documents'
+): Promise<{success: boolean, error?: string}> => {
+  try {
+    console.log('🗑️ === DELETE START ===');
+    console.log('📤 Storage path:', storagePath);
+    console.log('📦 Bucket:', bucketName);
+    
+    if (!storagePath) {
+      console.log('❌ No storage path provided');
+      return { success: false, error: 'No storage path provided' };
+    }
+    
+    // Remove the file from Supabase Storage
+    console.log('🗑️ Removing file from Supabase Storage...');
+    const { error: deleteError } = await supabase.storage
+      .from(bucketName)
+      .remove([storagePath]);
+    
+    if (deleteError) {
+      console.error('❌ === DELETE FAILED ===');
+      console.error('❌ Delete error:', deleteError);
+      console.error('❌ Error message:', deleteError.message);
+      return { success: false, error: `Delete failed: ${deleteError.message}` };
+    }
+    
+    console.log('✅ === DELETE SUCCESS ===');
+    console.log('🗑️ File removed from storage:', storagePath);
+    
+    return { success: true };
+    
+  } catch (error: any) {
+    console.error('❌ === DELETE ERROR ===');
+    console.error('❌ Error message:', error.message);
+    console.error('❌ Error stack:', error.stack);
+    
+    return { success: false, error: `Delete error: ${error.message}` };
+  }
+};

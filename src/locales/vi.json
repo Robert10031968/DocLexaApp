@@ -130,9 +130,19 @@
     "noPdfAvailableMessage": "Phân tích này không có tệp PDF liên quan.",
     "failedToLoadPdf": "Không thể tải PDF. Vui lòng thử lại.",
     "downloadCompletedUnknownLocation": "Tải xuống hoàn tất nhưng vị trí tệp không xác định.",
-    "failedToDownloadPdf": "Không thể tải xuống PDF. Vui lòng thử lại."
+    "failedToDownloadPdf": "Không thể tải xuống PDF. Vui lòng thử lại.",
+    "empty": "Không có kết quả."
   },
   "languageSelector": {
     "failedToChangeLanguage": "Không thể thay đổi ngôn ngữ. Vui lòng thử lại."
+  },
+  "paste": {
+    "title": "Dán văn bản",
+    "placeholder": "Dán văn bản của bạn tại đây…",
+    "fromClipboard": "Dán từ bảng tạm",
+    "analyze": "Phân tích văn bản",
+    "counters": "Ký tự: {{chars}} · Từ: {{words}} · Số trang ước tính: {{pages}}",
+    "clipboardEmpty": "Bảng tạm trống",
+    "tooLarge": "Văn bản vượt quá số trang tối đa cho mỗi tài liệu."
   }
 } 

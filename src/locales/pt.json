@@ -130,9 +130,19 @@
     "noPdfAvailableMessage": "Esta análise não tem um arquivo PDF associado.",
     "failedToLoadPdf": "Falha ao carregar PDF. Tente novamente.",
     "downloadCompletedUnknownLocation": "Download concluído mas a localização do arquivo é desconhecida.",
-    "failedToDownloadPdf": "Falha ao baixar PDF. Tente novamente."
+    "failedToDownloadPdf": "Falha ao baixar PDF. Tente novamente.",
+    "empty": "Nenhum resultado retornado."
   },
   "languageSelector": {
     "failedToChangeLanguage": "Falha ao alterar idioma. Tente novamente."
+  },
+  "paste": {
+    "title": "Colar texto",
+    "placeholder": "Cole seu texto aqui…",
+    "fromClipboard": "Colar da área de transferência",
+    "analyze": "Analisar texto",
+    "counters": "Caracteres: {{chars}} · Palavras: {{words}} · Páginas estimadas: {{pages}}",
+    "clipboardEmpty": "A área de transferência está vazia",
+    "tooLarge": "O texto excede o máximo de páginas por documento."
   }
 } 

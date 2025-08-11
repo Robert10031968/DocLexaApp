@@ -130,9 +130,19 @@
     "noPdfAvailableMessage": "Questa analisi non ha un file PDF associato.",
     "failedToLoadPdf": "Impossibile caricare PDF. Riprova.",
     "downloadCompletedUnknownLocation": "Download completato ma la posizione del file è sconosciuta.",
-    "failedToDownloadPdf": "Impossibile scaricare PDF. Riprova."
+    "failedToDownloadPdf": "Impossibile scaricare PDF. Riprova.",
+    "empty": "Nessun risultato restituito."
   },
   "languageSelector": {
     "failedToChangeLanguage": "Impossibile cambiare lingua. Riprova."
+  },
+  "paste": {
+    "title": "Incolla testo",
+    "placeholder": "Incolla qui il tuo testo…",
+    "fromClipboard": "Incolla dagli appunti",
+    "analyze": "Analizza testo",
+    "counters": "Caratteri: {{chars}} · Parole: {{words}} · Pagine stimate: {{pages}}",
+    "clipboardEmpty": "Gli appunti sono vuoti",
+    "tooLarge": "Il testo supera il numero massimo di pagine per documento."
   }
 } 

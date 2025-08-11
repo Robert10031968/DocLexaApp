@@ -130,9 +130,19 @@
     "noPdfAvailableMessage": "Cette analyse n'a pas de fichier PDF associé.",
     "failedToLoadPdf": "Impossible de charger le PDF. Veuillez réessayer.",
     "downloadCompletedUnknownLocation": "Téléchargement terminé mais l'emplacement du fichier est inconnu.",
-    "failedToDownloadPdf": "Impossible de télécharger le PDF. Veuillez réessayer."
+    "failedToDownloadPdf": "Impossible de télécharger le PDF. Veuillez réessayer.",
+    "empty": "Aucun résultat retourné."
   },
   "languageSelector": {
     "failedToChangeLanguage": "Impossible de changer de langue. Veuillez réessayer."
+  },
+  "paste": {
+    "title": "Coller du texte",
+    "placeholder": "Collez votre texte ici…",
+    "fromClipboard": "Coller depuis le presse-papiers",
+    "analyze": "Analyser le texte",
+    "counters": "Caractères : {{chars}} · Mots : {{words}} · Pages estimées : {{pages}}",
+    "clipboardEmpty": "Le presse-papiers est vide",
+    "tooLarge": "Le texte dépasse le nombre maximal de pages par document."
   }
 } 

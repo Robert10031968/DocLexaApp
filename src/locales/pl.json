@@ -134,5 +134,16 @@
   },
   "languageSelector": {
     "failedToChangeLanguage": "Nie udało się zmienić języka. Spróbuj ponownie."
+  },
+  "paste": {
+    "freeBanner": "Masz {{available}} stron w limicie, tekst ma {{pages}} stron — przeanalizujemy CAŁOŚĆ. {{free}} stron GRATIS 🎁",
+    "tooLarge": "Tekst przekracza limit {{max}} stron na dokument.",
+    "resultSummary": "Przeanalizowaliśmy {{pages_total}} stron. Z tego {{pages_charged}} policzono, {{pages_free}} GRATIS 🎁.",
+    "title": "Wklej tekst",
+    "placeholder": "Wklej tutaj…",
+    "fromClipboard": "Wklej ze schowka",
+    "analyze": "Analizuj tekst",
+    "counters": "Znaki: {{chars}} · Słowa: {{words}} · Szac. strony: {{pages}}",
+    "clipboardEmpty": "Schowek jest pusty"
   }
 } 

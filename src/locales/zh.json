@@ -130,9 +130,19 @@
     "noPdfAvailableMessage": "此分析没有关联的PDF文件。",
     "failedToLoadPdf": "加载PDF失败。请重试。",
     "downloadCompletedUnknownLocation": "下载完成但文件位置未知。",
-    "failedToDownloadPdf": "下载PDF失败。请重试。"
+    "failedToDownloadPdf": "下载PDF失败。请重试。",
+    "empty": "没有返回结果。"
   },
   "languageSelector": {
     "failedToChangeLanguage": "更改语言失败。请重试。"
+  },
+  "paste": {
+    "title": "粘贴文本",
+    "placeholder": "在此粘贴你的文本…",
+    "fromClipboard": "从剪贴板粘贴",
+    "analyze": "分析文本",
+    "counters": "字符：{{chars}} · 单词：{{words}} · 预估页数：{{pages}}",
+    "clipboardEmpty": "剪贴板为空",
+    "tooLarge": "文本超过了每个文档的最大页数限制。"
   }
 } 

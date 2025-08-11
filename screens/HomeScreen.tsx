@@ -11,6 +11,8 @@ import {
   TextInput,
   ActivityIndicator,
 } from 'react-native';
+import * as Clipboard from 'expo-clipboard';
+import { analyzePastedText } from '../lib/textAnalysis';
 import * as DocumentPicker from 'expo-document-picker';
 import * as ImagePicker from 'expo-image-picker';
 import * as FileSystem from 'expo-file-system';
@@ -18,7 +20,7 @@ import { useTranslation } from 'react-i18next';
 import { Footer } from '../components';
 import { analyzeDocument } from '../lib/documentAnalysis';
 import { supabase } from '../lib/supabase';
-import { testUploadNoValidation } from '../lib/fileUpload';
+import { testUploadNoValidation, deleteFileFromSupabase } from '../lib/fileUpload';
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
@@ -35,6 +37,7 @@ interface DocumentItem {
   uri: string;
   size?: number;
   publicUrl?: string;
+  storagePath?: string; // Full path in Supabase Storage bucket for deletion
 }
 
 interface ChatMessage {
@@ -51,6 +54,72 @@ const HomeScreen = () => {
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
   const [chatInput, setChatInput] = useState<string>('');
   const [analysisError, setAnalysisError] = useState<string | null>(null);
+  // Paste text section state
+  const [pastedText, setPastedText] = useState<string>('');
+  const [pasteCounters, setPasteCounters] = useState<{ chars: number; words: number; pages: number }>({ chars: 0, words: 0, pages: 0 });
+  const [isAnalyzingText, setIsAnalyzingText] = useState(false);
+  const [pasteError, setPasteError] = useState<string | null>(null);
+
+  function estimatePagesFromText(text: string, wordsPerPage = 300) {
+    const trimmed = (text || '').trim();
+    if (!trimmed) return { chars: 0, words: 0, pages: 0 };
+    const chars = text.length;
+    const words = trimmed.split(/\s+/).filter(Boolean).length;
+    const pages = Math.ceil(words / Math.max(1, wordsPerPage));
+    return { chars, words, pages };
+  }
+
+  React.useEffect(() => {
+    const handle = setTimeout(() => {
+      const next = estimatePagesFromText(pastedText, 300);
+      setPasteCounters(next);
+    }, 250);
+    return () => clearTimeout(handle);
+  }, [pastedText]);
+
+  const handlePasteFromClipboard = async () => {
+    try {
+      const clip = await Clipboard.getStringAsync();
+      if (!clip?.trim()) {
+        Alert.alert(t('paste.clipboardEmpty'), t('paste.clipboardEmpty'));
+        return;
+      }
+      setPastedText(clip);
+    } catch (e: any) {
+      Alert.alert('Clipboard Error', e?.message ?? 'Failed to read clipboard');
+    }
+  };
+
+  const handleAnalyzePastedText = async () => {
+    try {
+      if (!pastedText.trim()) return;
+      if (pasteCounters.pages <= 0) return;
+      setIsAnalyzingText(true);
+      setAnalysisError(null);
+      setPasteError(null);
+
+      const res = await analyzePastedText({
+        text: pastedText,
+        analysisType: 'summary',
+        words: pasteCounters.words,
+        pagesEstimated: pasteCounters.pages,
+        source: 'pasted',
+      });
+
+      if (res.success) {
+        setAnalysisResult(res.result || '');
+        await fetchUsageInfo();
+      } else {
+        Alert.alert(t('alerts.analysisError'), res.error || t('alerts.analysisFailed'));
+        setPasteError(res.error || t('alerts.analysisFailed'));
+      }
+    } catch (e: any) {
+      Alert.alert(t('alerts.analysisError'), e?.message || t('alerts.analysisFailed'));
+      setPasteError(e?.message || t('alerts.analysisFailed'));
+    } finally {
+      setIsAnalyzingText(false);
+    }
+  };
 
 
   const [usage, setUsage] = useState<number | null>(null);
@@ -129,7 +198,46 @@ const HomeScreen = () => {
         }
 
         if (validDocuments.length > 0) {
+          // Add to local documents first
           setDocuments(prev => [...prev, ...validDocuments]);
+          
+          // Immediately upload each document to Supabase Storage
+          console.log('📄 Documents selected, starting immediate uploads...');
+          for (const doc of validDocuments) {
+            try {
+              console.log(`📤 Uploading document: ${doc.name}`);
+              const uploadResult = await testUploadNoValidation(doc.uri, doc.name);
+              
+              if (uploadResult.success && uploadResult.publicUrl) {
+                console.log(`✅ Document "${doc.name}" uploaded successfully to Supabase`);
+                console.log('🔗 Public URL:', uploadResult.publicUrl);
+                console.log('📤 Storage path:', uploadResult.storagePath);
+                
+                // Update the document with the public URL and storage path
+                setDocuments(prev => prev.map(d => 
+                  d.id === doc.id 
+                    ? { 
+                        ...d, 
+                        publicUrl: uploadResult.publicUrl,
+                        storagePath: uploadResult.storagePath
+                      }
+                    : d
+                ));
+              } else {
+                console.error(`❌ Document "${doc.name}" upload failed:`, uploadResult.error);
+                Alert.alert(
+                  'Upload Warning',
+                  `Document "${doc.name}" saved locally but failed to upload to cloud storage. You can still analyze it, but it may not be available later.`
+                );
+              }
+            } catch (error: any) {
+              console.error(`❌ Document "${doc.name}" upload error:`, error);
+              Alert.alert(
+                'Upload Error',
+                `Document "${doc.name}" saved locally but failed to upload to cloud storage. You can still analyze it, but it may not be available later.`
+              );
+            }
+          }
         }
       }
     } catch (error) {
@@ -178,7 +286,60 @@ const HomeScreen = () => {
         uri: asset.uri,
       };
 
+      // Add to local documents first
       setDocuments(prev => [...prev, newDocument]);
+      
+      // Immediately upload to Supabase Storage
+      console.log('📸 === PHOTO UPLOAD START ===');
+      console.log('📸 Photo details:', {
+        uri: asset.uri,
+        filename: cameraPhotoName,
+        size: asset.fileSize,
+        type: asset.type
+      });
+      
+      try {
+        console.log('📤 Calling upload function...');
+        const uploadResult = await testUploadNoValidation(asset.uri, cameraPhotoName);
+        
+        if (uploadResult.success && uploadResult.publicUrl) {
+          console.log('✅ === PHOTO UPLOAD SUCCESS ===');
+          console.log('🔗 Public URL:', uploadResult.publicUrl);
+          console.log('📁 Document ID:', newDocument.id);
+          console.log('📤 Storage path:', uploadResult.storagePath);
+          
+          // Update the document with the public URL and storage path
+          setDocuments(prev => prev.map(doc => 
+            doc.id === newDocument.id 
+              ? { 
+                  ...doc, 
+                  publicUrl: uploadResult.publicUrl,
+                  storagePath: uploadResult.storagePath
+                }
+              : doc
+          ));
+          
+          console.log('✅ Document state updated with public URL and storage path');
+        } else {
+          console.error('❌ === PHOTO UPLOAD FAILED ===');
+          console.error('❌ Upload error:', uploadResult.error);
+          console.error('❌ Upload result:', uploadResult);
+          
+          Alert.alert(
+            'Upload Warning',
+            'Photo saved locally but failed to upload to cloud storage. You can still analyze it, but it may not be available later.'
+          );
+        }
+      } catch (error: any) {
+        console.error('❌ === PHOTO UPLOAD ERROR ===');
+        console.error('❌ Error message:', error.message);
+        console.error('❌ Error stack:', error.stack);
+        
+        Alert.alert(
+          'Upload Error',
+          'Photo saved locally but failed to upload to cloud storage. You can still analyze it, but it may not be available later.'
+        );
+      }
     }
   };
 
@@ -223,12 +384,131 @@ const HomeScreen = () => {
         uri: asset.uri,
       };
 
+      // Add to local documents first
       setDocuments(prev => [...prev, newDocument]);
+      
+      // Immediately upload to Supabase Storage
+      console.log('🖼️ === GALLERY UPLOAD START ===');
+      console.log('🖼️ Gallery photo details:', {
+        uri: asset.uri,
+        filename: fixedName,
+        originalName: asset.fileName,
+        size: asset.fileSize,
+        type: asset.type
+      });
+      
+      try {
+        console.log('📤 Calling upload function for gallery photo...');
+        const uploadResult = await testUploadNoValidation(asset.uri, fixedName);
+        
+        if (uploadResult.success && uploadResult.publicUrl) {
+          console.log('✅ === GALLERY UPLOAD SUCCESS ===');
+          console.log('🔗 Public URL:', uploadResult.publicUrl);
+          console.log('📁 Document ID:', newDocument.id);
+          console.log('📤 Storage path:', uploadResult.storagePath);
+          
+          // Update the document with the public URL and storage path
+          setDocuments(prev => prev.map(doc => 
+            doc.id === newDocument.id 
+              ? { 
+                  ...doc, 
+                  publicUrl: uploadResult.publicUrl,
+                  storagePath: uploadResult.storagePath
+                }
+              : doc
+          ));
+          
+          console.log('✅ Gallery document state updated with public URL and storage path');
+        } else {
+          console.error('❌ === GALLERY UPLOAD FAILED ===');
+          console.error('❌ Upload error:', uploadResult.error);
+          console.error('❌ Upload result:', uploadResult);
+          
+          Alert.alert(
+            'Upload Warning',
+            'Photo saved locally but failed to upload to cloud storage. You can still analyze it, but it may not be available later.'
+          );
+        }
+      } catch (error: any) {
+        console.error('❌ === GALLERY UPLOAD ERROR ===');
+        console.error('❌ Error message:', error.message);
+        console.error('❌ Error stack:', error.stack);
+        
+        Alert.alert(
+          'Upload Error',
+          'Photo saved locally but failed to upload to cloud storage. You can still analyze it, but it may not be available later.'
+        );
+      }
     }
   };
 
-  const handleRemoveDocument = (id: string) => {
+  /**
+   * Enhanced document removal function
+   * Removes document from local state and also deletes the file from Supabase Storage
+   * 
+   * @param id - The local document ID to remove
+   */
+  const handleRemoveDocument = async (id: string) => {
+    console.log('🗑️ === DOCUMENT REMOVAL START ===');
+    console.log('📁 Document ID to remove:', id);
+    
+    // Find the document before removing it from state
+    const documentToRemove = documents.find(doc => doc.id === id);
+    
+    if (!documentToRemove) {
+      console.log('❌ Document not found in local state');
+      return;
+    }
+    
+    console.log('📁 Document details:', {
+      name: documentToRemove.name,
+      type: documentToRemove.type,
+      storagePath: documentToRemove.storagePath,
+      hasPublicUrl: !!documentToRemove.publicUrl
+    });
+    
+    // Remove from local state first (immediate UI feedback)
     setDocuments(prev => prev.filter(doc => doc.id !== id));
+    console.log('✅ Document removed from local state');
+    
+    // If the document has a storage path, also remove it from Supabase Storage
+    if (documentToRemove.storagePath) {
+      console.log('🗑️ Attempting to remove file from Supabase Storage...');
+      
+      try {
+        const deleteResult = await deleteFileFromSupabase(documentToRemove.storagePath);
+        
+        if (deleteResult.success) {
+          console.log('✅ === DOCUMENT REMOVAL SUCCESS ===');
+          console.log('🗑️ File successfully removed from Supabase Storage');
+          console.log('📤 Storage path removed:', documentToRemove.storagePath);
+        } else {
+          console.error('❌ === STORAGE DELETE FAILED ===');
+          console.error('❌ Delete error:', deleteResult.error);
+          console.error('⚠️ Document removed from local state but failed to delete from storage');
+          
+          // Optionally show a warning to the user
+          Alert.alert(
+            'Storage Warning',
+            'Document removed from your device but failed to delete from cloud storage. The file may still exist in the cloud.'
+          );
+        }
+      } catch (error: any) {
+        console.error('❌ === STORAGE DELETE ERROR ===');
+        console.error('❌ Error message:', error.message);
+        console.error('❌ Error stack:', error.stack);
+        console.error('⚠️ Document removed from local state but error occurred during storage deletion');
+        
+        // Optionally show a warning to the user
+        Alert.alert(
+          'Storage Error',
+          'Document removed from your device but an error occurred while deleting from cloud storage.'
+        );
+      }
+    } else {
+      console.log('ℹ️ No storage path found, skipping Supabase Storage deletion');
+      console.log('✅ === DOCUMENT REMOVAL SUCCESS (LOCAL ONLY) ===');
+    }
   };
 
   // Helper function to check file size (5MB limit)
@@ -451,6 +731,35 @@ const HomeScreen = () => {
             )}
           </View>
 
+        </View>
+
+        {/* Paste Text Section */}
+        <View style={styles.pasteSection}>
+          <Text style={styles.sectionTitle}>{t('paste.title')}</Text>
+          <TextInput
+            style={styles.pasteInput}
+            placeholder={t('paste.placeholder')}
+            value={pastedText}
+            onChangeText={setPastedText}
+            multiline
+            numberOfLines={10}
+            textAlignVertical="top"
+          />
+          <Text style={styles.pasteCounters}>{t('paste.counters', { chars: pasteCounters.chars, words: pasteCounters.words, pages: pasteCounters.pages })}</Text>
+          {!!pasteError && <Text style={styles.pasteError}>{pasteError}</Text>}
+          <View style={styles.pasteButtonsRow}>
+            <TouchableOpacity style={[styles.uploadButton, { backgroundColor: '#6b7280' }]} onPress={handlePasteFromClipboard} activeOpacity={0.8}>
+              <Text style={styles.uploadButtonText}>{t('paste.fromClipboard')}</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[styles.uploadButton, (isAnalyzingText || pasteCounters.pages === 0 || !pastedText.trim()) && styles.analyzeButtonDisabled]}
+              onPress={handleAnalyzePastedText}
+              activeOpacity={0.8}
+              disabled={isAnalyzingText || pasteCounters.pages === 0 || !pastedText.trim()}
+            >
+              <Text style={styles.uploadButtonText}>{isAnalyzingText ? `🔄 ${t('analyzing')}` : t('paste.analyze')}</Text>
+            </TouchableOpacity>
+          </View>
         </View>
 
         {/* Upload Buttons */}
@@ -878,6 +1187,39 @@ const styles = StyleSheet.create({
     color: '#27ae60',
     marginTop: 2,
     fontWeight: '500',
+  },
+  // Paste text section styles
+  pasteSection: {
+    marginBottom: 30,
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    padding: 15,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 3,
+    elevation: 2,
+  },
+  pasteInput: {
+    backgroundColor: '#f1f2f6',
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: '#e5e7eb',
+    padding: 12,
+    minHeight: 140,
+    fontSize: 14,
+    color: '#2c3e50',
+    marginBottom: 8,
+  },
+  pasteCounters: { fontSize: 12, color: '#7f8c8d', marginTop: 8 },
+  pasteError: {
+    fontSize: 12,
+    color: '#b71c1c',
+    marginBottom: 8,
+  },
+  pasteButtonsRow: {
+    flexDirection: 'row',
+    gap: 15,
   },
 
 });
