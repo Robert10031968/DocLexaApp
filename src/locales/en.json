@@ -141,6 +141,7 @@
     "title": "Paste text",
     "placeholder": "Paste your text here…",
     "fromClipboard": "Paste from clipboard",
+    "clear": "Clear",
     "analyze": "Analyze text",
     "counters": "Chars: {{chars}} · Words: {{words}} · Estimated pages: {{pages}}",
     "clipboardEmpty": "Clipboard is empty"

@@ -140,6 +140,7 @@
     "title": "粘贴文本",
     "placeholder": "在此粘贴你的文本…",
     "fromClipboard": "从剪贴板粘贴",
+    "clear": "清空",
     "analyze": "分析文本",
     "counters": "字符：{{chars}} · 单词：{{words}} · 预估页数：{{pages}}",
     "clipboardEmpty": "剪贴板为空",

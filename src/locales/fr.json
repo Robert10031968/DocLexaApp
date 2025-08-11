@@ -140,6 +140,7 @@
     "title": "Coller du texte",
     "placeholder": "Collez votre texte ici…",
     "fromClipboard": "Coller depuis le presse-papiers",
+    "clear": "Effacer",
     "analyze": "Analyser le texte",
     "counters": "Caractères : {{chars}} · Mots : {{words}} · Pages estimées : {{pages}}",
     "clipboardEmpty": "Le presse-papiers est vide",

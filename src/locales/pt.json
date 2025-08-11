@@ -140,6 +140,7 @@
     "title": "Colar texto",
     "placeholder": "Cole seu texto aqui…",
     "fromClipboard": "Colar da área de transferência",
+    "clear": "Limpar",
     "analyze": "Analisar texto",
     "counters": "Caracteres: {{chars}} · Palavras: {{words}} · Páginas estimadas: {{pages}}",
     "clipboardEmpty": "A área de transferência está vazia",

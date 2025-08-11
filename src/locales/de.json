@@ -140,6 +140,7 @@
     "title": "Text einfügen",
     "placeholder": "Fügen Sie hier Ihren Text ein…",
     "fromClipboard": "Aus der Zwischenablage einfügen",
+    "clear": "Leeren",
     "analyze": "Text analysieren",
     "counters": "Zeichen: {{chars}} · Wörter: {{words}} · Geschätzte Seiten: {{pages}}",
     "clipboardEmpty": "Die Zwischenablage ist leer",

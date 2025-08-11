@@ -142,6 +142,7 @@
     "title": "Wklej tekst",
     "placeholder": "Wklej tutaj…",
     "fromClipboard": "Wklej ze schowka",
+    "clear": "Wyczyść",
     "analyze": "Analizuj tekst",
     "counters": "Znaki: {{chars}} · Słowa: {{words}} · Szac. strony: {{pages}}",
     "clipboardEmpty": "Schowek jest pusty"

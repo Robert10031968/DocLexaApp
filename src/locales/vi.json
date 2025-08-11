@@ -140,6 +140,7 @@
     "title": "Dán văn bản",
     "placeholder": "Dán văn bản của bạn tại đây…",
     "fromClipboard": "Dán từ bảng tạm",
+    "clear": "Xóa",
     "analyze": "Phân tích văn bản",
     "counters": "Ký tự: {{chars}} · Từ: {{words}} · Số trang ước tính: {{pages}}",
     "clipboardEmpty": "Bảng tạm trống",

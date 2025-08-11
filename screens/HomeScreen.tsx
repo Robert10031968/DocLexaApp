@@ -121,6 +121,13 @@ const HomeScreen = () => {
     }
   };
 
+  const handleClearPastedText = () => {
+    // Clear pasted text and related UI state
+    setPastedText('');
+    setPasteCounters({ chars: 0, words: 0, pages: 0 });
+    setPasteError(null);
+  };
+
 
   const [usage, setUsage] = useState<number | null>(null);
   const [quota, setQuota] = useState<number | null>(null);
@@ -750,6 +757,20 @@ const HomeScreen = () => {
           <View style={styles.pasteButtonsRow}>
             <TouchableOpacity style={[styles.uploadButton, { backgroundColor: '#6b7280' }]} onPress={handlePasteFromClipboard} activeOpacity={0.8}>
               <Text style={styles.uploadButtonText}>{t('paste.fromClipboard')}</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[
+                styles.uploadButton,
+                { backgroundColor: '#6b7280' },
+                (isAnalyzingText || !pastedText.trim()) && styles.analyzeButtonDisabled
+              ]}
+              onPress={handleClearPastedText}
+              activeOpacity={0.8}
+              disabled={isAnalyzingText || !pastedText.trim()}
+              accessibilityRole="button"
+              accessibilityLabel={t('paste.clear')}
+            >
+              <Text style={styles.uploadButtonText}>{t('paste.clear')}</Text>
             </TouchableOpacity>
             <TouchableOpacity
               style={[styles.uploadButton, (isAnalyzingText || pasteCounters.pages === 0 || !pastedText.trim()) && styles.analyzeButtonDisabled]}

@@ -140,6 +140,7 @@
     "title": "Incolla testo",
     "placeholder": "Incolla qui il tuo testo…",
     "fromClipboard": "Incolla dagli appunti",
+    "clear": "Cancella",
     "analyze": "Analizza testo",
     "counters": "Caratteri: {{chars}} · Parole: {{words}} · Pagine stimate: {{pages}}",
     "clipboardEmpty": "Gli appunti sono vuoti",

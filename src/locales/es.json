@@ -140,6 +140,7 @@
     "title": "Pegar texto",
     "placeholder": "Pega tu texto aquí…",
     "fromClipboard": "Pegar desde el portapapeles",
+    "clear": "Limpiar",
     "analyze": "Analizar texto",
     "counters": "Caracteres: {{chars}} · Palabras: {{words}} · Páginas estimadas: {{pages}}",
     "clipboardEmpty": "El portapapeles está vacío",
