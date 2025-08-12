@@ -125,6 +125,9 @@
   },
   "analysisResults": {
     "title": "Analysis Results",
+    "askFollowUp": "Ask a follow-up…",
+    "viewLast": "View result",
+    "close": "Close",
     "noPdfAvailable": "No PDF Available",
     "noPdfAvailableMessage": "This analysis does not have a PDF file associated with it.",
     "failedToLoadPdf": "Failed to load PDF. Please try again.",
@@ -145,5 +148,13 @@
     "analyze": "Analyze text",
     "counters": "Chars: {{chars}} · Words: {{words}} · Estimated pages: {{pages}}",
     "clipboardEmpty": "Clipboard is empty"
+  },
+  "home": {
+    "items": "Items",
+    "actions": {
+      "paste": "Paste",
+      "file": "File",
+      "photo": "Photo"
+    }
   }
 } 

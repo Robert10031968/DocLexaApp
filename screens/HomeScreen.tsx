@@ -10,7 +10,9 @@ import {
   Dimensions,
   TextInput,
   ActivityIndicator,
+  Modal,
 } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import * as Clipboard from 'expo-clipboard';
 import { analyzePastedText } from '../lib/textAnalysis';
 import * as DocumentPicker from 'expo-document-picker';
@@ -108,6 +110,9 @@ const HomeScreen = () => {
 
       if (res.success) {
         setAnalysisResult(res.result || '');
+        setQaItems([]);
+        setActiveSessionId(Date.now().toString());
+        setIsResultModalOpen(true);
         await fetchUsageInfo();
       } else {
         Alert.alert(t('alerts.analysisError'), res.error || t('alerts.analysisFailed'));
@@ -137,6 +142,8 @@ const HomeScreen = () => {
 
   const { t } = useTranslation();
   const { user } = useAuth();
+  const insets = useSafeAreaInsets();
+  const [footerHeight, setFooterHeight] = useState<number>(60);
 
 
 
@@ -622,6 +629,9 @@ const HomeScreen = () => {
       });
       if (result.success) {
         setAnalysisResult(result.result || 'No result returned.');
+        setQaItems([]);
+        setActiveSessionId(Date.now().toString());
+        setIsResultModalOpen(true);
         // Log analysis event
         try {
           await logAnalysisEvent({
@@ -644,28 +654,16 @@ const HomeScreen = () => {
   };
 
   const handleSendChatMessage = () => {
-    if (chatInput.trim()) {
-      const newMessage: ChatMessage = {
-        id: Date.now().toString(),
-        text: chatInput.trim(),
-        isUser: true,
-        timestamp: new Date(),
-      };
+    if (!chatInput.trim()) return;
+    const qText = chatInput.trim();
+    const now = Date.now();
+    setQaItems(prev => [...prev, { q: qText, a: '…', ts: now }]);
+    setChatInput('');
 
-      setChatMessages(prev => [...prev, newMessage]);
-      setChatInput('');
-
-      // Simulate AI response
-      setTimeout(() => {
-        const aiResponse: ChatMessage = {
-          id: (Date.now() + 1).toString(),
-          text: 'Thank you for your question. I\'m here to help you with your document analysis.',
-          isUser: false,
-          timestamp: new Date(),
-        };
-        setChatMessages(prev => [...prev, aiResponse]);
-      }, 1000);
-    }
+    // Simulated follow-up AI reply; later can call follow-up endpoint
+    setTimeout(() => {
+      setQaItems(prev => prev.map(item => item.ts === now ? { ...item, a: 'Here is an additional insight based on your question.' } : item));
+    }, 700);
   };
 
   // Footer handlers
@@ -708,11 +706,55 @@ const HomeScreen = () => {
     </View>
   );
 
+  // Compact item renderer for horizontal carousel
+  const renderCompactDocumentItem = ({ item }: { item: DocumentItem }) => (
+    <View style={styles.compactItem}>
+      <Text style={styles.compactItemIcon}>{item.type === 'pdf' ? '📄' : '📷'}</Text>
+      <Text style={styles.compactItemName} numberOfLines={1}>{item.name}</Text>
+      <TouchableOpacity
+        onPress={() => handleRemoveDocument(item.id)}
+        style={styles.compactRemoveButton}
+        accessibilityRole="button"
+        accessibilityLabel={t('remove')}
+      >
+        <Text style={styles.compactRemoveIcon}>✕</Text>
+      </TouchableOpacity>
+    </View>
+  );
+
+  // Items section is always visible when there are documents
+
+  // Result modal and Q&A session state
+  const [isResultModalOpen, setIsResultModalOpen] = useState<boolean>(false);
+  const [activeSessionId, setActiveSessionId] = useState<string | null>(null);
+  const [qaItems, setQaItems] = useState<Array<{ q: string; a: string; ts: number }>>([]);
+
+  // Unified analyze CTA handler
+  const handleUnifiedAnalyzePress = async () => {
+    const hasPasted = pastedText.trim().length > 0;
+    if (hasPasted) {
+      await handleAnalyzePastedText();
+      return;
+    }
+    if (documents.length > 0) {
+      await handleStartAnalysis();
+    }
+  };
+
+  // Inline analyze button handler (prefer documents over pasted text)
+  const handleInlineAnalyzePress = async () => {
+    if (documents.length > 0) {
+      await handleStartAnalysis();
+    } else if (pastedText.trim().length > 0) {
+      await handleAnalyzePastedText();
+    }
+  };
+
   return (
     <View style={styles.container}>
       <ScrollView
         style={styles.scrollView}
-        contentContainerStyle={styles.contentContainer}
+        contentContainerStyle={[styles.contentContainer, { paddingBottom: footerHeight + 72 }]}
         keyboardShouldPersistTaps="handled"
       >
         {/* Header Section */}
@@ -738,11 +780,51 @@ const HomeScreen = () => {
             )}
           </View>
 
+          {!!analysisResult && (
+            <TouchableOpacity
+              style={styles.viewResultButton}
+              onPress={() => setIsResultModalOpen(true)}
+              accessibilityRole="button"
+            >
+              <Text style={styles.viewResultText}>{t('analysisResults.viewLast', 'View result')}</Text>
+            </TouchableOpacity>
+          )}
+
         </View>
 
-        {/* Paste Text Section */}
+        {/* Entry Section: actions row + textarea */}
         <View style={styles.pasteSection}>
           <Text style={styles.sectionTitle}>{t('paste.title')}</Text>
+
+          {/* Actions Row */}
+          <View style={styles.actionsRow}>
+            <View style={styles.actionsLeft}>
+              <TouchableOpacity style={styles.actionButton} onPress={handlePasteFromClipboard} activeOpacity={0.8}>
+                <Text style={styles.actionIcon}>📋</Text>
+                <Text style={styles.actionText}>{t('home.actions.paste', 'Paste')}</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.actionButton} onPress={handleUploadDocuments} activeOpacity={0.8}>
+                <Text style={styles.actionIcon}>📄</Text>
+                <Text style={styles.actionText}>{t('home.actions.file', 'File')}</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.actionButton} onPress={handleTakePhotos} activeOpacity={0.8}>
+                <Text style={styles.actionIcon}>📷</Text>
+                <Text style={styles.actionText}>{t('home.actions.photo', 'Photo')}</Text>
+              </TouchableOpacity>
+            </View>
+            <TouchableOpacity
+              style={[styles.clearGhostButton, (isAnalyzingText || !pastedText.trim()) && styles.clearGhostDisabled]}
+              onPress={handleClearPastedText}
+              activeOpacity={0.8}
+              disabled={isAnalyzingText || !pastedText.trim()}
+              accessibilityRole="button"
+              accessibilityLabel={t('paste.clear')}
+            >
+              <Text style={styles.clearGhostText}>{t('paste.clear')}</Text>
+            </TouchableOpacity>
+          </View>
+
+          {/* Textarea */}
           <TextInput
             style={styles.pasteInput}
             placeholder={t('paste.placeholder')}
@@ -754,166 +836,123 @@ const HomeScreen = () => {
           />
           <Text style={styles.pasteCounters}>{t('paste.counters', { chars: pasteCounters.chars, words: pasteCounters.words, pages: pasteCounters.pages })}</Text>
           {!!pasteError && <Text style={styles.pasteError}>{pasteError}</Text>}
-          <View style={styles.pasteButtonsRow}>
-            <TouchableOpacity style={[styles.uploadButton, { backgroundColor: '#6b7280' }]} onPress={handlePasteFromClipboard} activeOpacity={0.8}>
-              <Text style={styles.uploadButtonText}>{t('paste.fromClipboard')}</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={[
-                styles.uploadButton,
-                { backgroundColor: '#6b7280' },
-                (isAnalyzingText || !pastedText.trim()) && styles.analyzeButtonDisabled
-              ]}
-              onPress={handleClearPastedText}
-              activeOpacity={0.8}
-              disabled={isAnalyzingText || !pastedText.trim()}
-              accessibilityRole="button"
-              accessibilityLabel={t('paste.clear')}
-            >
-              <Text style={styles.uploadButtonText}>{t('paste.clear')}</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={[styles.uploadButton, (isAnalyzingText || pasteCounters.pages === 0 || !pastedText.trim()) && styles.analyzeButtonDisabled]}
-              onPress={handleAnalyzePastedText}
-              activeOpacity={0.8}
-              disabled={isAnalyzingText || pasteCounters.pages === 0 || !pastedText.trim()}
-            >
-              <Text style={styles.uploadButtonText}>{isAnalyzingText ? `🔄 ${t('analyzing')}` : t('paste.analyze')}</Text>
-            </TouchableOpacity>
-          </View>
+
+          {/* Analyze moved to sticky CTA */}
         </View>
 
-        {/* Upload Buttons */}
-        <View style={styles.uploadSection}>
-          <TouchableOpacity
-            style={styles.uploadButton}
-            onPress={handleUploadDocuments}
-            activeOpacity={0.8}
-          >
-            <Text style={styles.uploadButtonIcon}>📄</Text>
-            <Text style={styles.uploadButtonText}>{t('uploadDocument')}</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={styles.uploadButton}
-            onPress={handleTakePhotos}
-            activeOpacity={0.8}
-          >
-            <Text style={styles.uploadButtonIcon}>📷</Text>
-            <Text style={styles.uploadButtonText}>{t('takePhoto')}</Text>
-          </TouchableOpacity>
-        </View>
-
-
-
-        {/* Document Pool Section */}
+        {/* Items Carousel (collapsible) */}
         {documents.length > 0 && (
-          <View style={styles.documentPoolSection}>
-            <Text style={styles.sectionTitle}>{t('documentPool')}</Text>
+          <View style={styles.itemsCard}>
+            <View style={styles.itemsHeader}>
+              <Text style={styles.itemsHeaderTitle}>{t('home.items', 'Items')} ({documents.length})</Text>
+              {/* Chevron removed from UX; always expanded when items exist */}
+            </View>
             <FlatList
               data={documents}
-              renderItem={renderDocumentItem}
+              renderItem={renderCompactDocumentItem}
               keyExtractor={item => item.id}
-              scrollEnabled={false}
-              style={styles.documentList}
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              ItemSeparatorComponent={() => <View style={{ width: 10 }} />}
+              contentContainerStyle={styles.itemsListContent}
             />
           </View>
         )}
 
-        {/* Analyze Button */}
-        <View style={styles.analyzeSection}>
-          <TouchableOpacity
-            style={[
-              styles.analyzeButton,
-              (documents.length === 0 || isAnalyzing) && styles.analyzeButtonDisabled
-            ]}
-            onPress={handleStartAnalysis}
-            disabled={documents.length === 0 || isAnalyzing}
-            activeOpacity={0.8}
-          >
-            <Text style={[
-              styles.analyzeButtonText,
-              (documents.length === 0 || isAnalyzing) && styles.analyzeButtonTextDisabled
-            ]}>
-              {isAnalyzing ? `🔄 ${t('analyzing')}` : t('startAnalyzing')}
-            </Text>
-          </TouchableOpacity>
-        </View>
+        {/* Single inline Analyze button removed; now fixed above footer */}
 
-        {/* Persistent Analysis Result Section */}
-        <View style={styles.resultSection}>
-          <Text style={styles.sectionTitle}>{t('analysisResults.title')}</Text>
-          <View style={styles.resultContainer}>
-            {isAnalyzing ? (
-              <ActivityIndicator size="large" color="#3498db" style={{ marginVertical: 20 }} />
-            ) : analysisResult ? (
-              <>
-                <Text style={styles.resultText}>{analysisResult}</Text>
+        {/* Old analyze button removed */}
 
-              </>
-            ) : analysisError ? (
-              <Text style={[styles.resultText, { color: 'red' }]}>{analysisError}</Text>
-            ) : (
-              <Text style={styles.placeholderText}>
-                {t('resultPlaceholder')}
-              </Text>
-            )}
-          </View>
-        </View>
-
-        {/* Chat Section */}
-        <View style={styles.chatSection}>
-          <Text style={styles.chatHelperText}>
-            {t('chatHelperText')}
-          </Text>
-
-          {/* Chat Messages */}
-          {chatMessages.length > 0 && (
-            <View style={styles.chatMessagesContainer}>
-              {chatMessages.map((message) => (
-                <View key={message.id} style={[
-                  styles.chatMessage,
-                  message.isUser ? styles.userMessage : styles.aiMessage
-                ]}>
-                  <Text style={[
-                    styles.chatMessageText,
-                    message.isUser ? styles.userMessageText : styles.aiMessageText
-                  ]}>
-                    {message.text}
-                  </Text>
-                </View>
-              ))}
-            </View>
-          )}
-
-          {/* Chat Input */}
-          <View style={styles.chatInputContainer}>
-            <TextInput
-              style={styles.chatInput}
-              value={chatInput}
-              onChangeText={setChatInput}
-              placeholder={t('chat_input_placeholder')}
-              placeholderTextColor="#999"
-              multiline
-            />
-            <TouchableOpacity
-              style={styles.sendButton}
-              onPress={handleSendChatMessage}
-              disabled={!chatInput.trim()}
-            >
-              <Text style={styles.sendButtonText}>{t('send_button_text')}</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
+        {/* Inline result section intentionally not rendered; modal handles results */}
 
       </ScrollView>
 
+      {/* Sticky CTA removed; single inline button used instead */}
+
+      {/* Fixed Start Analyzing button above footer */}
+      {(pastedText.trim() !== '' || documents.length > 0) && (
+        <View style={[
+          styles.stickyAnalyzeButtonContainer,
+          { bottom: footerHeight + insets.bottom + 8 }
+        ]}>
+          <TouchableOpacity
+            style={[
+              styles.stickyAnalyzeButton,
+              (isAnalyzing || isAnalyzingText) && styles.stickyCtaButtonDisabled
+            ]}
+            onPress={handleInlineAnalyzePress}
+            disabled={isAnalyzing || isAnalyzingText}
+            activeOpacity={0.9}
+          >
+            <Text style={styles.stickyAnalyzeButtonText}>{(isAnalyzing || isAnalyzingText) ? `🔄 ${t('analyzing')}` : t('startAnalyzing')}</Text>
+          </TouchableOpacity>
+        </View>
+      )}
+
       {/* Footer */}
-      <Footer
-        onPrivacyPolicy={handlePrivacyPolicy}
-        onTermsOfService={handleTermsOfService}
-        onCancelSubscription={handleCancelSubscription}
-      />
+      <View onLayout={(e) => setFooterHeight(e.nativeEvent.layout.height)}>
+        <Footer
+          onPrivacyPolicy={handlePrivacyPolicy}
+          onTermsOfService={handleTermsOfService}
+          onCancelSubscription={handleCancelSubscription}
+        />
+      </View>
+
+      {/* Analysis Result Modal */}
+      <Modal
+        visible={isResultModalOpen && !!analysisResult}
+        animationType="slide"
+        transparent={false}
+        onRequestClose={() => setIsResultModalOpen(false)}
+      >
+        <View style={styles.modalContainer}>
+          <View style={styles.modalHeader}>
+            <Text style={styles.modalTitle}>{t('analysisResults.title')}</Text>
+            <TouchableOpacity onPress={() => setIsResultModalOpen(false)} accessibilityRole="button">
+              <Text style={styles.modalCloseText}>{t('analysisResults.close', 'Close')} ✕</Text>
+            </TouchableOpacity>
+          </View>
+          <ScrollView style={styles.modalContent} contentContainerStyle={styles.modalContentContainer}>
+            {analysisResult ? (
+              <>
+                <Text style={styles.resultText}>{analysisResult}</Text>
+                {qaItems.length > 0 && (
+                  <View style={styles.followUpContainer}>
+                    {qaItems.map((qa) => (
+                      <View key={qa.ts} style={{ marginTop: 8 }}>
+                        <Text style={[styles.followUpText, { fontWeight: '600' }]}>Q: {qa.q}</Text>
+                        <Text style={styles.followUpText}>A: {qa.a}</Text>
+                      </View>
+                    ))}
+                  </View>
+                )}
+              </>
+            ) : isAnalyzing ? (
+              <ActivityIndicator size="large" color="#3498db" style={{ marginVertical: 20 }} />
+            ) : analysisError ? (
+              <Text style={[styles.resultText, { color: 'red' }]}>{analysisError}</Text>
+            ) : (
+              <Text style={styles.placeholderText}>{t('resultPlaceholder')}</Text>
+            )}
+          </ScrollView>
+          <View style={styles.modalFooter}>
+            <TextInput
+              style={styles.followUpInput}
+              value={chatInput}
+              onChangeText={setChatInput}
+              placeholder={t('analysisResults.askFollowUp', 'Ask a follow-up…')}
+              placeholderTextColor="#9aa0a6"
+            />
+            <TouchableOpacity
+              style={[styles.followUpSendButton, !chatInput.trim() && styles.followUpSendDisabled]}
+              onPress={handleSendChatMessage}
+              disabled={!chatInput.trim()}
+            >
+              <Text style={styles.followUpSendText}>{t('send_button_text')}</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 };
@@ -928,7 +967,7 @@ const styles = StyleSheet.create({
   },
   contentContainer: {
     padding: 20,
-    paddingBottom: 40,
+    paddingBottom: 160,
   },
 
   headerSection: {
@@ -949,6 +988,19 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginTop: 4,
     marginBottom: 8,
+  },
+  viewResultButton: {
+    alignSelf: 'center',
+    backgroundColor: '#1118270D',
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+    borderRadius: 999,
+    marginTop: 8,
+  },
+  viewResultText: {
+    color: '#111827',
+    fontSize: 13,
+    fontWeight: '600',
   },
 
   uploadSection: {
@@ -1075,6 +1127,75 @@ const styles = StyleSheet.create({
   analyzeButtonTextDisabled: {
     color: '#95a5a6',
   },
+  // Sticky CTA styles
+  stickyCtaContainer: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    bottom: 84, // lifted above Footer (~60) + extra spacing
+    paddingHorizontal: 16,
+    paddingTop: 8,
+    paddingBottom: 16,
+    backgroundColor: 'rgba(248,249,250,0.95)',
+    borderTopWidth: 1,
+    borderTopColor: '#e5e7eb',
+    zIndex: 1,
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 3,
+  },
+  stickyCtaButton: {
+    backgroundColor: '#27ae60',
+    borderRadius: 12,
+    paddingVertical: 14,
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.12,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  stickyCtaButtonDisabled: {
+    backgroundColor: '#bdc3c7',
+  },
+  stickyCtaButtonText: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: '#fff',
+  },
+  stickyCtaSubtextRow: {
+    marginTop: 6,
+    paddingHorizontal: 6,
+  },
+  stickyCtaSubtext: {
+    textAlign: 'center',
+    fontSize: 12,
+    color: '#6b7280',
+  },
+  stickyAnalyzeButtonContainer: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    paddingHorizontal: 16,
+    backgroundColor: '#fff',
+    paddingVertical: 10,
+    borderTopWidth: 1,
+    borderTopColor: '#ddd',
+    zIndex: 20,
+  },
+  stickyAnalyzeButton: {
+    backgroundColor: '#007bff',
+    borderRadius: 8,
+    paddingVertical: 14,
+    alignItems: 'center',
+  },
+  stickyAnalyzeButtonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: '700',
+  },
   resultSection: {
     marginBottom: 20,
   },
@@ -1095,86 +1216,82 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     paddingVertical: 20,
   },
-  chatSection: {
-    marginTop: 20,
-    backgroundColor: '#fff',
-    borderRadius: 12,
-    padding: 15,
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 1,
-    },
-    shadowOpacity: 0.05,
-    shadowRadius: 3,
-    elevation: 2,
+  followUpContainer: {
+    marginTop: 12,
+    gap: 6,
   },
-  chatHelperText: {
-    fontSize: 14,
-    color: '#7f8c8d',
-    marginBottom: 10,
-    textAlign: 'center',
+  followUpText: {
+    fontSize: 13,
+    color: '#374151',
+    lineHeight: 18,
   },
-  chatMessagesContainer: {
-    maxHeight: 200,
-    marginBottom: 10,
-  },
-  chatMessage: {
-    borderRadius: 10,
-    padding: 10,
-    marginBottom: 8,
-    maxWidth: '80%',
-  },
-  userMessage: {
-    backgroundColor: '#3498db',
-    alignSelf: 'flex-end',
-  },
-  aiMessage: {
-    backgroundColor: '#ecf0f1',
-    alignSelf: 'flex-start',
-  },
-  chatMessageText: {
-    fontSize: 14,
-    color: '#fff',
-  },
-  userMessageText: {
-    color: '#fff',
-  },
-  aiMessageText: {
-    color: '#2c3e50',
-  },
-  chatInputContainer: {
+  followUpInputRow: {
+    marginTop: 10,
     flexDirection: 'row',
-    alignItems: 'flex-end',
-    backgroundColor: '#f1f2f6',
-    borderRadius: 10,
-    padding: 10,
-    borderWidth: 1,
-    borderColor: '#e0e0e0',
+    alignItems: 'center',
   },
-  chatInput: {
+  followUpInput: {
     flex: 1,
+    backgroundColor: '#fff',
+    borderWidth: 1,
+    borderColor: '#e5e7eb',
+    borderRadius: 8,
+    paddingVertical: 8,
+    paddingHorizontal: 10,
     fontSize: 14,
     color: '#2c3e50',
-    paddingVertical: 0,
-    paddingHorizontal: 5,
-    minHeight: 40,
-    maxHeight: 100,
-    textAlignVertical: 'top',
   },
-  sendButton: {
+  followUpSendButton: {
+    marginLeft: 8,
     backgroundColor: '#3498db',
     borderRadius: 8,
     paddingVertical: 8,
-    paddingHorizontal: 15,
-    marginLeft: 10,
-    alignItems: 'center',
-    justifyContent: 'center',
+    paddingHorizontal: 12,
   },
-  sendButtonText: {
-    fontSize: 14,
-    fontWeight: '600',
+  followUpSendDisabled: {
+    backgroundColor: '#aab4bd',
+  },
+  followUpSendText: {
     color: '#fff',
+    fontSize: 13,
+    fontWeight: '600',
+  },
+  // Modal styles
+  modalContainer: {
+    flex: 1,
+    backgroundColor: '#fff',
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: '#e5e7eb',
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: '#111827',
+  },
+  modalCloseText: {
+    fontSize: 14,
+    color: '#6b7280',
+  },
+  modalContent: {
+    flex: 1,
+    paddingHorizontal: 16,
+  },
+  modalContentContainer: {
+    paddingVertical: 16,
+  },
+  modalFooter: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 12,
+    borderTopWidth: 1,
+    borderTopColor: '#e5e7eb',
   },
 
   usageCounterContainer: {
@@ -1221,6 +1338,51 @@ const styles = StyleSheet.create({
     shadowRadius: 3,
     elevation: 2,
   },
+  actionsRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 10,
+  },
+  actionsLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  actionButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#3498db',
+    borderRadius: 8,
+    paddingVertical: 6,
+    paddingHorizontal: 10,
+    borderWidth: 0,
+  },
+  actionIcon: {
+    fontSize: 14,
+    marginRight: 6,
+    color: '#fff',
+  },
+  actionText: {
+    fontSize: 12,
+    color: '#fff',
+    fontWeight: '600',
+  },
+  clearGhostButton: {
+    paddingVertical: 6,
+    paddingHorizontal: 10,
+    borderRadius: 8,
+    borderWidth: 0,
+    backgroundColor: '#e74c3c',
+  },
+  clearGhostDisabled: {
+    opacity: 0.5,
+  },
+  clearGhostText: {
+    fontSize: 12,
+    color: '#fff',
+    fontWeight: '600',
+  },
   pasteInput: {
     backgroundColor: '#f1f2f6',
     borderRadius: 10,
@@ -1238,9 +1400,68 @@ const styles = StyleSheet.create({
     color: '#b71c1c',
     marginBottom: 8,
   },
-  pasteButtonsRow: {
+  pasteAnalyzeRow: {
+    marginTop: 10,
+    alignItems: 'flex-start',
+  },
+
+  // Items collapsible card
+  itemsCard: {
+    marginBottom: 30,
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    padding: 12,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 3,
+    elevation: 2,
+  },
+  itemsHeader: {
     flexDirection: 'row',
-    gap: 15,
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingVertical: 4,
+    marginBottom: 8,
+  },
+  itemsHeaderTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#2c3e50',
+  },
+  // Chevron removed
+  itemsListContent: {
+    paddingVertical: 4,
+  },
+
+  // Compact item styles
+  compactItem: {
+    width: 140,
+    backgroundColor: '#f9fafb',
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: '#e5e7eb',
+    paddingVertical: 10,
+    paddingHorizontal: 10,
+  },
+  compactItemIcon: {
+    fontSize: 20,
+    marginBottom: 6,
+  },
+  compactItemName: {
+    fontSize: 12,
+    color: '#374151',
+  },
+  compactRemoveButton: {
+    position: 'absolute',
+    top: 6,
+    right: 6,
+    padding: 4,
+  },
+  compactRemoveIcon: {
+    fontSize: 14,
+    color: '#e74c3c',
+    fontWeight: 'bold',
   },
 
 });

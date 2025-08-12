@@ -126,6 +126,9 @@
   },
   "analysisResults": {
     "title": "Wyniki Analizy",
+    "askFollowUp": "Dopytaj…",
+    "viewLast": "Pokaż wynik",
+    "close": "Zamknij",
     "noPdfAvailable": "Brak dostępnego PDF",
     "noPdfAvailableMessage": "Ta analiza nie ma powiązanego pliku PDF.",
     "failedToLoadPdf": "Nie udało się załadować PDF. Spróbuj ponownie.",
@@ -146,5 +149,13 @@
     "analyze": "Analizuj tekst",
     "counters": "Znaki: {{chars}} · Słowa: {{words}} · Szac. strony: {{pages}}",
     "clipboardEmpty": "Schowek jest pusty"
+  },
+  "home": {
+    "items": "Pozycje",
+    "actions": {
+      "paste": "Wklej",
+      "file": "Plik",
+      "photo": "Zdjęcie"
+    }
   }
 } 
