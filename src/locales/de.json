@@ -86,6 +86,7 @@
   "alerts": {
     "error": "Fehler",
     "uploadError": "Upload-Fehler",
+    "uploadErrorTitle": "Upload-Fehler",
     "analysisError": "Analyse-Fehler",
     "noDocuments": "Keine Dokumente",
     "privacyPolicy": "Datenschutzrichtlinie",
@@ -99,7 +100,19 @@
     "analysisFailed": "Analyse fehlgeschlagen.",
     "privacyPolicyMessage": "Dies würde zur Datenschutzrichtlinie-Bildschirm navigieren oder eine URL öffnen.",
     "termsOfServiceMessage": "Dies würde zu den Nutzungsbedingungen-Bildschirm navigieren oder eine URL öffnen.",
-    "cancelSubscriptionMessage": "Dies würde zur Abonnement-Verwaltungsbildschirm navigieren."
+    "cancelSubscriptionMessage": "Dies würde zur Abonnement-Verwaltungsbildschirm navigieren.",
+    "clipboardErrorTitle": "Zwischenablage-Fehler",
+    "clipboardErrorMessage": "Zwischenablage konnte nicht gelesen werden.",
+    "permissionRequiredTitle": "Berechtigung erforderlich",
+    "cameraPermissionMessage": "Wir benötigen Kameraberechtigungen.",
+    "galleryPermissionMessage": "Wir benötigen Galerieberechtigungen.",
+    "uploadWarningTitle": "Upload-Warnung",
+    "photoUploadWarning": "Foto lokal gespeichert, aber Upload in die Cloud fehlgeschlagen. Analyse ist möglich, aber die Datei ist später evtl. nicht verfügbar.",
+    "documentUploadWarning": "Dokument „{{name}}“ lokal gespeichert, aber Upload in die Cloud fehlgeschlagen. Analyse ist möglich, aber die Datei ist später evtl. nicht verfügbar.",
+    "storageWarningTitle": "Speicher-Warnung",
+    "storageWarningMessage": "Dokument vom Gerät entfernt, aber Löschen aus dem Cloud-Speicher fehlgeschlagen. Die Datei kann weiterhin in der Cloud existieren.",
+    "storageErrorTitle": "Speicher-Fehler",
+    "storageErrorMessage": "Dokument vom Gerät entfernt, aber beim Löschen aus dem Cloud-Speicher ist ein Fehler aufgetreten."
   },
   "login": {
     "signIn": "Anmelden",
@@ -126,6 +139,11 @@
   },
   "analysisResults": {
     "title": "Analyseergebnisse",
+    "viewLast": "Ergebnis anzeigen",
+    "close": "Schließen",
+    "askFollowUp": "Rückfrage stellen…",
+    "noResult": "Kein Inhalt zurückgegeben.",
+    "simulatedAnswer": "Hier ist ein zusätzlicher Hinweis basierend auf deiner Frage.",
     "noPdfAvailable": "Kein PDF verfügbar",
     "noPdfAvailableMessage": "Diese Analyse hat keine zugehörige PDF-Datei.",
     "failedToLoadPdf": "PDF konnte nicht geladen werden. Bitte versuchen Sie es erneut.",
@@ -145,5 +163,20 @@
     "counters": "Zeichen: {{chars}} · Wörter: {{words}} · Geschätzte Seiten: {{pages}}",
     "clipboardEmpty": "Die Zwischenablage ist leer",
     "tooLarge": "Der Text überschreitet die maximale Seitenzahl pro Dokument."
+  },
+  "actions": { "remove": "Entfernen" },
+  "home": { "items": "Elemente", "actions": { "paste": "Einfügen", "file": "Datei", "photo": "Foto" } },
+  "document": { "defaultName": "Dokument" },
+  "image": { "defaultName": "Galeriebild" },
+  "qa": { "question": "F", "answer": "A" }
+  ,
+  "plan": {
+    "unlimited": "Unbegrenzt",
+    "expired": "Abonnement abgelaufen",
+    "statusUnknown": "Tarifstatus nicht verfügbar",
+    "freeTrial_one": "Kostenlose Testphase – {{count}} Seite übrig",
+    "freeTrial_other": "Kostenlose Testphase – {{count}} Seiten übrig",
+    "pagesLeft_one": "{{count}} Seite übrig",
+    "pagesLeft_other": "{{count}} Seiten übrig"
   }
 } 

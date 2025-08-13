@@ -86,6 +86,7 @@
   "alerts": {
     "error": "Erro",
     "uploadError": "Erro de Upload",
+    "uploadErrorTitle": "Erro de upload",
     "analysisError": "Erro de Análise",
     "noDocuments": "Nenhum Documento",
     "privacyPolicy": "Política de Privacidade",
@@ -99,7 +100,19 @@
     "analysisFailed": "Análise falhou.",
     "privacyPolicyMessage": "Isso navegaria para a tela da Política de Privacidade ou abriria um URL.",
     "termsOfServiceMessage": "Isso navegaria para a tela dos Termos de Serviço ou abriria um URL.",
-    "cancelSubscriptionMessage": "Isso navegaria para a tela de gerenciamento de assinatura."
+    "cancelSubscriptionMessage": "Isso navegaria para a tela de gerenciamento de assinatura.",
+    "clipboardErrorTitle": "Erro da área de transferência",
+    "clipboardErrorMessage": "Falha ao ler a área de transferência.",
+    "permissionRequiredTitle": "Permissão necessária",
+    "cameraPermissionMessage": "Precisamos de permissão da câmera para isso funcionar.",
+    "galleryPermissionMessage": "Precisamos de permissão da galeria para isso funcionar.",
+    "uploadWarningTitle": "Aviso de upload",
+    "photoUploadWarning": "A foto foi salva localmente, mas não foi enviada para a nuvem. Ainda é possível analisar, mas pode não estar disponível depois.",
+    "documentUploadWarning": "O documento \"{{name}}\" foi salvo localmente, mas não foi enviado para a nuvem. Ainda é possível analisar, mas pode não estar disponível depois.",
+    "storageWarningTitle": "Aviso de armazenamento",
+    "storageWarningMessage": "Documento removido do dispositivo, mas não foi possível excluir do armazenamento em nuvem. O arquivo pode continuar existindo na nuvem.",
+    "storageErrorTitle": "Erro de armazenamento",
+    "storageErrorMessage": "Documento removido do dispositivo, mas ocorreu um erro ao excluir do armazenamento em nuvem."
   },
   "login": {
     "signIn": "Entrar",
@@ -125,7 +138,12 @@
     "ok": "OK"
   },
   "analysisResults": {
-    "title": "Resultados da Análise",
+    "title": "Resultados da análise",
+    "viewLast": "Ver resultado",
+    "close": "Fechar",
+    "askFollowUp": "Pergunta de acompanhamento…",
+    "noResult": "Nenhum conteúdo retornado.",
+    "simulatedAnswer": "Aqui vai um insight adicional com base na sua pergunta.",
     "noPdfAvailable": "Nenhum PDF disponível",
     "noPdfAvailableMessage": "Esta análise não tem um arquivo PDF associado.",
     "failedToLoadPdf": "Falha ao carregar PDF. Tente novamente.",
@@ -145,5 +163,20 @@
     "counters": "Caracteres: {{chars}} · Palavras: {{words}} · Páginas estimadas: {{pages}}",
     "clipboardEmpty": "A área de transferência está vazia",
     "tooLarge": "O texto excede o máximo de páginas por documento."
+  },
+  "actions": { "remove": "Remover" },
+  "home": { "items": "Itens", "actions": { "paste": "Colar", "file": "Arquivo", "photo": "Foto" } },
+  "document": { "defaultName": "Documento" },
+  "image": { "defaultName": "Imagem da galeria" },
+  "qa": { "question": "P", "answer": "R" }
+  ,
+  "plan": {
+    "unlimited": "Ilimitado",
+    "expired": "Assinatura expirada",
+    "statusUnknown": "Status do plano indisponível",
+    "freeTrial_one": "Período de teste – resta {{count}} página",
+    "freeTrial_other": "Período de teste – restam {{count}} páginas",
+    "pagesLeft_one": "Resta {{count}} página",
+    "pagesLeft_other": "Restam {{count}} páginas"
   }
 } 

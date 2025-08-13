@@ -86,6 +86,7 @@
   "alerts": {
     "error": "错误",
     "uploadError": "上传错误",
+    "uploadErrorTitle": "上传错误",
     "analysisError": "分析错误",
     "noDocuments": "无文档",
     "privacyPolicy": "隐私政策",
@@ -99,7 +100,19 @@
     "analysisFailed": "分析失败。",
     "privacyPolicyMessage": "这将导航到隐私政策屏幕或打开URL。",
     "termsOfServiceMessage": "这将导航到服务条款屏幕或打开URL。",
-    "cancelSubscriptionMessage": "这将导航到订阅管理屏幕。"
+    "cancelSubscriptionMessage": "这将导航到订阅管理屏幕。",
+    "clipboardErrorTitle": "剪贴板错误",
+    "clipboardErrorMessage": "无法读取剪贴板。",
+    "permissionRequiredTitle": "需要权限",
+    "cameraPermissionMessage": "需要相机权限才能正常工作。",
+    "galleryPermissionMessage": "需要相册权限才能正常工作。",
+    "uploadWarningTitle": "上传警告",
+    "photoUploadWarning": "照片已本地保存，但上传云端失败。仍可分析，但以后可能无法访问。",
+    "documentUploadWarning": "文档“{{name}}”已本地保存，但上传云端失败。仍可分析，但以后可能无法访问。",
+    "storageWarningTitle": "存储警告",
+    "storageWarningMessage": "文档已从你的设备移除，但未能从云存储删除。该文件可能仍存在于云端。",
+    "storageErrorTitle": "存储错误",
+    "storageErrorMessage": "文档已从你的设备移除，但从云存储删除时发生错误。"
   },
   "login": {
     "signIn": "登录",
@@ -126,6 +139,11 @@
   },
   "analysisResults": {
     "title": "分析结果",
+    "viewLast": "查看结果",
+    "close": "关闭",
+    "askFollowUp": "继续追问…",
+    "noResult": "没有返回内容。",
+    "simulatedAnswer": "基于你的问题，这里有一些补充见解。",
     "noPdfAvailable": "无可用PDF",
     "noPdfAvailableMessage": "此分析没有关联的PDF文件。",
     "failedToLoadPdf": "加载PDF失败。请重试。",
@@ -145,5 +163,18 @@
     "counters": "字符：{{chars}} · 单词：{{words}} · 预估页数：{{pages}}",
     "clipboardEmpty": "剪贴板为空",
     "tooLarge": "文本超过了每个文档的最大页数限制。"
+  },
+  "actions": { "remove": "删除" },
+  "home": { "items": "项目", "actions": { "paste": "粘贴", "file": "文件", "photo": "照片" } },
+  "document": { "defaultName": "文档" },
+  "image": { "defaultName": "相册图片" },
+  "qa": { "question": "问", "answer": "答" }
+  ,
+  "plan": {
+    "unlimited": "不限量",
+    "expired": "订阅已过期",
+    "statusUnknown": "套餐状态不可用",
+    "freeTrial": "试用期 – 剩余 {{count}} 页",
+    "pagesLeft": "剩余 {{count}} 页"
   }
 } 

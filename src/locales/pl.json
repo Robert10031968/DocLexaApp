@@ -86,6 +86,7 @@
   "alerts": {
     "error": "Błąd",
     "uploadError": "Błąd Przesyłania",
+    "uploadErrorTitle": "Błąd przesyłania",
     "analysisError": "Błąd Analizy",
     "noDocuments": "Brak Dokumentów",
     "privacyPolicy": "Polityka Prywatności",
@@ -99,7 +100,19 @@
     "analysisFailed": "Analiza nie powiodła się.",
     "privacyPolicyMessage": "To przekieruje do ekranu Polityki Prywatności lub otworzy URL.",
     "termsOfServiceMessage": "To przekieruje do ekranu Warunków Usługi lub otworzy URL.",
-    "cancelSubscriptionMessage": "To przekieruje do ekranu zarządzania subskrypcją."
+    "cancelSubscriptionMessage": "To przekieruje do ekranu zarządzania subskrypcją.",
+    "clipboardErrorTitle": "Błąd schowka",
+    "clipboardErrorMessage": "Nie udało się odczytać schowka.",
+    "permissionRequiredTitle": "Wymagane uprawnienie",
+    "cameraPermissionMessage": "Potrzebujemy dostępu do aparatu, aby to działało.",
+    "galleryPermissionMessage": "Potrzebujemy dostępu do galerii, aby to działało.",
+    "uploadWarningTitle": "Ostrzeżenie dotyczące przesyłania",
+    "photoUploadWarning": "Zdjęcie zapisano lokalnie, ale nie udało się wysłać do chmury. Analiza jest możliwa, lecz plik może nie być dostępny później.",
+    "documentUploadWarning": "Dokument „{{name}}” zapisano lokalnie, ale nie udało się wysłać do chmury. Analiza jest możliwa, lecz plik może nie być dostępny później.",
+    "storageWarningTitle": "Ostrzeżenie magazynu",
+    "storageWarningMessage": "Dokument usunięto z urządzenia, ale nie udało się usunąć go z chmury. Plik może nadal istnieć w chmurze.",
+    "storageErrorTitle": "Błąd magazynu",
+    "storageErrorMessage": "Dokument usunięto z urządzenia, ale wystąpił błąd podczas usuwania z chmury."
   },
   "login": {
     "signIn": "Zaloguj się",
@@ -129,6 +142,8 @@
     "askFollowUp": "Dopytaj…",
     "viewLast": "Pokaż wynik",
     "close": "Zamknij",
+    "noResult": "Brak zwróconej treści.",
+    "simulatedAnswer": "Oto dodatkowa wskazówka na podstawie Twojego pytania.",
     "noPdfAvailable": "Brak dostępnego PDF",
     "noPdfAvailableMessage": "Ta analiza nie ma powiązanego pliku PDF.",
     "failedToLoadPdf": "Nie udało się załadować PDF. Spróbuj ponownie.",
@@ -150,6 +165,7 @@
     "counters": "Znaki: {{chars}} · Słowa: {{words}} · Szac. strony: {{pages}}",
     "clipboardEmpty": "Schowek jest pusty"
   },
+  "actions": { "remove": "Usuń" },
   "home": {
     "items": "Pozycje",
     "actions": {
@@ -157,5 +173,20 @@
       "file": "Plik",
       "photo": "Zdjęcie"
     }
+  },
+  "document": { "defaultName": "Dokument" },
+  "image": { "defaultName": "Zdjęcie z galerii" },
+  "qa": { "question": "Pytanie", "answer": "Odpowiedź" }
+  ,
+  "plan": {
+    "unlimited": "Nielimitowany",
+    "expired": "Subskrypcja wygasła",
+    "statusUnknown": "Brak informacji o planie",
+    "freeTrial_one": "Okres próbny – pozostała {{count}} strona",
+    "freeTrial_few": "Okres próbny – pozostały {{count}} strony",
+    "freeTrial_many": "Okres próbny – pozostało {{count}} stron",
+    "pagesLeft_one": "Pozostała {{count}} strona",
+    "pagesLeft_few": "Pozostały {{count}} strony",
+    "pagesLeft_many": "Pozostało {{count}} stron"
   }
 } 

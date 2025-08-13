@@ -85,6 +85,7 @@
   "alerts": {
     "error": "Error",
     "uploadError": "Upload Error",
+    "uploadErrorTitle": "Upload Error",
     "analysisError": "Analysis Error",
     "noDocuments": "No Documents",
     "privacyPolicy": "Privacy Policy",
@@ -98,7 +99,19 @@
     "analysisFailed": "Analysis failed.",
     "privacyPolicyMessage": "This would navigate to the Privacy Policy screen or open a URL.",
     "termsOfServiceMessage": "This would navigate to the Terms of Service screen or open a URL.",
-    "cancelSubscriptionMessage": "This would navigate to the subscription management screen."
+    "cancelSubscriptionMessage": "This would navigate to the subscription management screen.",
+    "clipboardErrorTitle": "Clipboard Error",
+    "clipboardErrorMessage": "Failed to read clipboard.",
+    "permissionRequiredTitle": "Permission Required",
+    "cameraPermissionMessage": "We need camera permissions to make this work.",
+    "galleryPermissionMessage": "We need gallery permissions to make this work.",
+    "uploadWarningTitle": "Upload Warning",
+    "photoUploadWarning": "Photo saved locally but failed to upload to cloud storage. You can still analyze it, but it may not be available later.",
+    "documentUploadWarning": "Document \"{{name}}\" saved locally but failed to upload to cloud storage. You can still analyze it, but it may not be available later.",
+    "storageWarningTitle": "Storage Warning",
+    "storageWarningMessage": "Document removed from your device but failed to delete from cloud storage. The file may still exist in the cloud.",
+    "storageErrorTitle": "Storage Error",
+    "storageErrorMessage": "Document removed from your device but an error occurred while deleting from cloud storage."
   },
   "login": {
     "signIn": "Sign In",
@@ -128,6 +141,8 @@
     "askFollowUp": "Ask a follow-up…",
     "viewLast": "View result",
     "close": "Close",
+    "noResult": "No result returned.",
+    "simulatedAnswer": "Here is an additional insight based on your question.",
     "noPdfAvailable": "No PDF Available",
     "noPdfAvailableMessage": "This analysis does not have a PDF file associated with it.",
     "failedToLoadPdf": "Failed to load PDF. Please try again.",
@@ -149,6 +164,7 @@
     "counters": "Chars: {{chars}} · Words: {{words}} · Estimated pages: {{pages}}",
     "clipboardEmpty": "Clipboard is empty"
   },
+  "actions": { "remove": "Remove" },
   "home": {
     "items": "Items",
     "actions": {
@@ -156,5 +172,18 @@
       "file": "File",
       "photo": "Photo"
     }
+  },
+  "document": { "defaultName": "Document" },
+  "image": { "defaultName": "Gallery Image" },
+  "qa": { "question": "Q", "answer": "A" }
+  ,
+  "plan": {
+    "unlimited": "Unlimited",
+    "expired": "Subscription expired",
+    "statusUnknown": "Plan status unavailable",
+    "freeTrial_one": "Free Trial – {{count}} page left",
+    "freeTrial_other": "Free Trial – {{count}} pages left",
+    "pagesLeft_one": "{{count}} page left",
+    "pagesLeft_other": "{{count}} pages left"
   }
 } 

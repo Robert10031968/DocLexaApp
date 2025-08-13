@@ -6,7 +6,7 @@
   "analyzing": "Analyse en cours...",
   "error": "Quelque chose s'est mal passé",
   "title": "Votre Assistant de Documents IA",
-  "subtitle": "Téléchargez des documents ou prenez des photos et laissez l'IA les analyser pour vous",
+  "subtitle": "Téléchargez des documents ou prenez des photos et laissez l’IA les analyser pour vous",
   "uploadDocument": "Télécharger le Document",
   "takePhoto": "Prendre une Photo",
   "documentPool": "Pool de Documents",
@@ -85,7 +85,8 @@
   },
   "alerts": {
     "error": "Erreur",
-    "uploadError": "Erreur de Téléchargement",
+    "uploadError": "Erreur de Téléversement",
+    "uploadErrorTitle": "Erreur de téléversement",
     "analysisError": "Erreur d'Analyse",
     "noDocuments": "Aucun Document",
     "privacyPolicy": "Politique de Confidentialité",
@@ -99,7 +100,19 @@
     "analysisFailed": "L'analyse a échoué.",
     "privacyPolicyMessage": "Cela naviguerait vers l'écran de la Politique de Confidentialité ou ouvrirait une URL.",
     "termsOfServiceMessage": "Cela naviguerait vers l'écran des Conditions de Service ou ouvrirait une URL.",
-    "cancelSubscriptionMessage": "Cela naviguerait vers l'écran de gestion des abonnements."
+    "cancelSubscriptionMessage": "Cela naviguerait vers l'écran de gestion des abonnements.",
+    "clipboardErrorTitle": "Erreur du presse‑papiers",
+    "clipboardErrorMessage": "Impossible de lire le presse‑papiers.",
+    "permissionRequiredTitle": "Autorisation requise",
+    "cameraPermissionMessage": "Nous avons besoin de l’autorisation caméra.",
+    "galleryPermissionMessage": "Nous avons besoin de l’autorisation galerie.",
+    "uploadWarningTitle": "Avertissement de téléversement",
+    "photoUploadWarning": "Photo enregistrée localement mais impossible de l’envoyer dans le cloud. L’analyse est possible, mais le fichier pourrait ne pas être disponible plus tard.",
+    "documentUploadWarning": "Le document « {{name}} » a été enregistré localement mais n’a pas pu être téléversé. L’analyse est possible, mais le fichier pourrait ne pas être disponible plus tard.",
+    "storageWarningTitle": "Avertissement de stockage",
+    "storageWarningMessage": "Document supprimé de votre appareil mais impossible de le supprimer du stockage cloud. Le fichier peut encore exister dans le cloud.",
+    "storageErrorTitle": "Erreur de stockage",
+    "storageErrorMessage": "Document supprimé de votre appareil mais une erreur s’est produite lors de la suppression du stockage cloud."
   },
   "login": {
     "signIn": "Se connecter",
@@ -125,7 +138,12 @@
     "ok": "OK"
   },
   "analysisResults": {
-    "title": "Résultats de l'Analyse",
+    "title": "Résultats de l’analyse",
+    "viewLast": "Voir le résultat",
+    "close": "Fermer",
+    "askFollowUp": "Question de suivi…",
+    "noResult": "Aucun contenu renvoyé.",
+    "simulatedAnswer": "Voici un complément basé sur votre question.",
     "noPdfAvailable": "Aucun PDF disponible",
     "noPdfAvailableMessage": "Cette analyse n'a pas de fichier PDF associé.",
     "failedToLoadPdf": "Impossible de charger le PDF. Veuillez réessayer.",
@@ -145,5 +163,20 @@
     "counters": "Caractères : {{chars}} · Mots : {{words}} · Pages estimées : {{pages}}",
     "clipboardEmpty": "Le presse-papiers est vide",
     "tooLarge": "Le texte dépasse le nombre maximal de pages par document."
+  },
+  "actions": { "remove": "Supprimer" },
+  "home": { "items": "Éléments", "actions": { "paste": "Coller", "file": "Fichier", "photo": "Photo" } },
+  "document": { "defaultName": "Document" },
+  "image": { "defaultName": "Image de la galerie" },
+  "qa": { "question": "Q", "answer": "R" }
+  ,
+  "plan": {
+    "unlimited": "Illimité",
+    "expired": "Abonnement expiré",
+    "statusUnknown": "Statut de l’offre indisponible",
+    "freeTrial_one": "Essai gratuit – {{count}} page restante",
+    "freeTrial_other": "Essai gratuit – {{count}} pages restantes",
+    "pagesLeft_one": "{{count}} page restante",
+    "pagesLeft_other": "{{count}} pages restantes"
   }
 } 

@@ -88,7 +88,7 @@ const HomeScreen = () => {
       }
       setPastedText(clip);
     } catch (e: any) {
-      Alert.alert('Clipboard Error', e?.message ?? 'Failed to read clipboard');
+      Alert.alert(t('alerts.clipboardErrorTitle'), t('alerts.clipboardErrorMessage'));
     }
   };
 
@@ -115,12 +115,12 @@ const HomeScreen = () => {
         setIsResultModalOpen(true);
         await fetchUsageInfo();
       } else {
-        Alert.alert(t('alerts.analysisError'), res.error || t('alerts.analysisFailed'));
-        setPasteError(res.error || t('alerts.analysisFailed'));
+        Alert.alert(t('alerts.analysisError'), t('alerts.analysisFailed'));
+        setPasteError(t('alerts.analysisFailed'));
       }
     } catch (e: any) {
-      Alert.alert(t('alerts.analysisError'), e?.message || t('alerts.analysisFailed'));
-      setPasteError(e?.message || t('alerts.analysisFailed'));
+      Alert.alert(t('alerts.analysisError'), t('alerts.analysisFailed'));
+      setPasteError(t('alerts.analysisFailed'));
     } finally {
       setIsAnalyzingText(false);
     }
@@ -199,7 +199,7 @@ const HomeScreen = () => {
           }
           
           const timestamp = Date.now();
-          const originalName = asset.name || `Document`;
+          const originalName = asset.name || t('document.defaultName');
           const fixedName = fixFileName(originalName, false);
           
           validDocuments.push({
@@ -240,15 +240,15 @@ const HomeScreen = () => {
               } else {
                 console.error(`❌ Document "${doc.name}" upload failed:`, uploadResult.error);
                 Alert.alert(
-                  'Upload Warning',
-                  `Document "${doc.name}" saved locally but failed to upload to cloud storage. You can still analyze it, but it may not be available later.`
+                  t('alerts.uploadWarningTitle'),
+                  t('alerts.documentUploadWarning', { name: doc.name })
                 );
               }
             } catch (error: any) {
               console.error(`❌ Document "${doc.name}" upload error:`, error);
               Alert.alert(
-                'Upload Error',
-                `Document "${doc.name}" saved locally but failed to upload to cloud storage. You can still analyze it, but it may not be available later.`
+                t('alerts.uploadErrorTitle'),
+                t('alerts.documentUploadWarning', { name: doc.name })
               );
             }
           }
@@ -263,8 +263,8 @@ const HomeScreen = () => {
     const { status } = await ImagePicker.requestCameraPermissionsAsync();
     if (status !== 'granted') {
       Alert.alert(
-        'Permission Required',
-        'Sorry, we need camera permissions to make this work!'
+        t('alerts.permissionRequiredTitle'),
+        t('alerts.cameraPermissionMessage')
       );
       return;
     }
@@ -340,8 +340,8 @@ const HomeScreen = () => {
           console.error('❌ Upload result:', uploadResult);
           
           Alert.alert(
-            'Upload Warning',
-            'Photo saved locally but failed to upload to cloud storage. You can still analyze it, but it may not be available later.'
+            t('alerts.uploadWarningTitle'),
+            t('alerts.photoUploadWarning')
           );
         }
       } catch (error: any) {
@@ -350,8 +350,8 @@ const HomeScreen = () => {
         console.error('❌ Error stack:', error.stack);
         
         Alert.alert(
-          'Upload Error',
-          'Photo saved locally but failed to upload to cloud storage. You can still analyze it, but it may not be available later.'
+          t('alerts.uploadErrorTitle'),
+          t('alerts.photoUploadWarning')
         );
       }
     }
@@ -361,8 +361,8 @@ const HomeScreen = () => {
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (status !== 'granted') {
       Alert.alert(
-        'Permission Required',
-        'Sorry, we need gallery permissions to make this work!'
+        t('alerts.permissionRequiredTitle'),
+        t('alerts.galleryPermissionMessage')
       );
       return;
     }
@@ -388,7 +388,7 @@ const HomeScreen = () => {
       
       const timestamp = Date.now();
       // Ensure the filename has a proper extension for gallery images
-      const originalName = asset.fileName || `Gallery Image`;
+      const originalName = asset.fileName || t('image.defaultName');
       const fixedName = fixFileName(originalName, true);
       
       const newDocument: DocumentItem = {
@@ -439,8 +439,8 @@ const HomeScreen = () => {
           console.error('❌ Upload result:', uploadResult);
           
           Alert.alert(
-            'Upload Warning',
-            'Photo saved locally but failed to upload to cloud storage. You can still analyze it, but it may not be available later.'
+            t('alerts.uploadWarningTitle'),
+            t('alerts.photoUploadWarning')
           );
         }
       } catch (error: any) {
@@ -449,8 +449,8 @@ const HomeScreen = () => {
         console.error('❌ Error stack:', error.stack);
         
         Alert.alert(
-          'Upload Error',
-          'Photo saved locally but failed to upload to cloud storage. You can still analyze it, but it may not be available later.'
+          t('alerts.uploadErrorTitle'),
+          t('alerts.photoUploadWarning')
         );
       }
     }
@@ -503,8 +503,8 @@ const HomeScreen = () => {
           
           // Optionally show a warning to the user
           Alert.alert(
-            'Storage Warning',
-            'Document removed from your device but failed to delete from cloud storage. The file may still exist in the cloud.'
+            t('alerts.storageWarningTitle'),
+            t('alerts.storageWarningMessage')
           );
         }
       } catch (error: any) {
@@ -515,8 +515,8 @@ const HomeScreen = () => {
         
         // Optionally show a warning to the user
         Alert.alert(
-          'Storage Error',
-          'Document removed from your device but an error occurred while deleting from cloud storage.'
+          t('alerts.storageErrorTitle'),
+          t('alerts.storageErrorMessage')
         );
       }
     } else {
@@ -576,7 +576,7 @@ const HomeScreen = () => {
       const uploadResult = await testUploadNoValidation(doc.uri, fixedFileName);
       
       if (!uploadResult.success) {
-        Alert.alert(t('alerts.uploadError'), uploadResult.error || t('alerts.failedToUploadDocument'));
+        Alert.alert(t('alerts.uploadErrorTitle'), t('alerts.failedToUploadDocument'));
         return undefined;
       }
       
@@ -585,7 +585,7 @@ const HomeScreen = () => {
       
     } catch (err: any) {
       console.error('Upload error:', err);
-      Alert.alert(t('alerts.uploadError'), err.message || t('alerts.failedToUploadDocument'));
+      Alert.alert(t('alerts.uploadErrorTitle'), t('alerts.failedToUploadDocument'));
       return undefined;
     }
   };
@@ -614,7 +614,7 @@ const HomeScreen = () => {
         const uploadResult = await testUploadNoValidation(doc.uri, fixedFileName);
         if (!uploadResult.success || !uploadResult.publicUrl) {
           setIsAnalyzing(false);
-          Alert.alert(t('alerts.uploadError'), uploadResult.error || t('alerts.failedToUploadDocument'));
+          Alert.alert(t('alerts.uploadErrorTitle'), t('alerts.failedToUploadDocument'));
           return;
         }
         publicUrl = uploadResult.publicUrl;
@@ -623,12 +623,12 @@ const HomeScreen = () => {
       }
       // Call the Edge Function
       const analysisType = 'summary'; // Default analysis type
-      const result = await analyzeDocument({
+        const result = await analyzeDocument({
         document_url: publicUrl,
         analysis_type: analysisType,
       });
       if (result.success) {
-        setAnalysisResult(result.result || 'No result returned.');
+        setAnalysisResult(result.result || t('analysisResults.noResult'));
         setQaItems([]);
         setActiveSessionId(Date.now().toString());
         setIsResultModalOpen(true);
@@ -642,12 +642,12 @@ const HomeScreen = () => {
           console.error('❌ Error logging analysis event:', err);
         }
       } else {
-        setAnalysisError(result.error || t('alerts.analysisFailed'));
-        Alert.alert(t('alerts.analysisError'), result.error || t('alerts.analysisFailed'));
+        setAnalysisError(t('alerts.analysisFailed'));
+        Alert.alert(t('alerts.analysisError'), t('alerts.analysisFailed'));
       }
     } catch (err: any) {
-      setAnalysisError(err.message || t('alerts.analysisFailed'));
-      Alert.alert(t('alerts.analysisError'), err.message || t('alerts.analysisFailed'));
+      setAnalysisError(t('alerts.analysisFailed'));
+      Alert.alert(t('alerts.analysisError'), t('alerts.analysisFailed'));
     } finally {
       setIsAnalyzing(false);
     }
@@ -662,7 +662,7 @@ const HomeScreen = () => {
 
     // Simulated follow-up AI reply; later can call follow-up endpoint
     setTimeout(() => {
-      setQaItems(prev => prev.map(item => item.ts === now ? { ...item, a: 'Here is an additional insight based on your question.' } : item));
+      setQaItems(prev => prev.map(item => item.ts === now ? { ...item, a: t('analysisResults.simulatedAnswer') } : item));
     }, 700);
   };
 
@@ -715,7 +715,7 @@ const HomeScreen = () => {
         onPress={() => handleRemoveDocument(item.id)}
         style={styles.compactRemoveButton}
         accessibilityRole="button"
-        accessibilityLabel={t('remove')}
+        accessibilityLabel={t('actions.remove')}
       >
         <Text style={styles.compactRemoveIcon}>✕</Text>
       </TouchableOpacity>
@@ -768,11 +768,8 @@ const HomeScreen = () => {
               <Text style={styles.usageError}>{usageError}</Text>
             ) : planInfo ? (
               <>
-                <Text style={styles.planNameText}>
-                  {planInfo.planName}
-                </Text>
                 <Text style={styles.usageCounterText}>
-                  {getHomeScreenDisplayText(planInfo)}
+                  {getHomeScreenDisplayText(planInfo, t)}
                 </Text>
               </>
             ) : (
@@ -786,7 +783,7 @@ const HomeScreen = () => {
               onPress={() => setIsResultModalOpen(true)}
               accessibilityRole="button"
             >
-              <Text style={styles.viewResultText}>{t('analysisResults.viewLast', 'View result')}</Text>
+              <Text style={styles.viewResultText}>{t('analysisResults.viewLast')}</Text>
             </TouchableOpacity>
           )}
 
@@ -801,15 +798,15 @@ const HomeScreen = () => {
             <View style={styles.actionsLeft}>
               <TouchableOpacity style={styles.actionButton} onPress={handlePasteFromClipboard} activeOpacity={0.8}>
                 <Text style={styles.actionIcon}>📋</Text>
-                <Text style={styles.actionText}>{t('home.actions.paste', 'Paste')}</Text>
+                <Text style={styles.actionText}>{t('home.actions.paste')}</Text>
               </TouchableOpacity>
               <TouchableOpacity style={styles.actionButton} onPress={handleUploadDocuments} activeOpacity={0.8}>
                 <Text style={styles.actionIcon}>📄</Text>
-                <Text style={styles.actionText}>{t('home.actions.file', 'File')}</Text>
+                <Text style={styles.actionText}>{t('home.actions.file')}</Text>
               </TouchableOpacity>
               <TouchableOpacity style={styles.actionButton} onPress={handleTakePhotos} activeOpacity={0.8}>
                 <Text style={styles.actionIcon}>📷</Text>
-                <Text style={styles.actionText}>{t('home.actions.photo', 'Photo')}</Text>
+                <Text style={styles.actionText}>{t('home.actions.photo')}</Text>
               </TouchableOpacity>
             </View>
             <TouchableOpacity
@@ -844,7 +841,7 @@ const HomeScreen = () => {
         {documents.length > 0 && (
           <View style={styles.itemsCard}>
             <View style={styles.itemsHeader}>
-              <Text style={styles.itemsHeaderTitle}>{t('home.items', 'Items')} ({documents.length})</Text>
+              <Text style={styles.itemsHeaderTitle}>{t('home.items')} ({documents.length})</Text>
               {/* Chevron removed from UX; always expanded when items exist */}
             </View>
             <FlatList
@@ -909,7 +906,7 @@ const HomeScreen = () => {
           <View style={styles.modalHeader}>
             <Text style={styles.modalTitle}>{t('analysisResults.title')}</Text>
             <TouchableOpacity onPress={() => setIsResultModalOpen(false)} accessibilityRole="button">
-              <Text style={styles.modalCloseText}>{t('analysisResults.close', 'Close')} ✕</Text>
+              <Text style={styles.modalCloseText}>{t('analysisResults.close')} ✕</Text>
             </TouchableOpacity>
           </View>
           <ScrollView style={styles.modalContent} contentContainerStyle={styles.modalContentContainer}>
@@ -920,8 +917,8 @@ const HomeScreen = () => {
                   <View style={styles.followUpContainer}>
                     {qaItems.map((qa) => (
                       <View key={qa.ts} style={{ marginTop: 8 }}>
-                        <Text style={[styles.followUpText, { fontWeight: '600' }]}>Q: {qa.q}</Text>
-                        <Text style={styles.followUpText}>A: {qa.a}</Text>
+                        <Text style={[styles.followUpText, { fontWeight: '600' }]}>{`${t('qa.question')}: ${qa.q}`}</Text>
+                        <Text style={styles.followUpText}>{`${t('qa.answer')}: ${qa.a}`}</Text>
                       </View>
                     ))}
                   </View>
@@ -940,7 +937,7 @@ const HomeScreen = () => {
               style={styles.followUpInput}
               value={chatInput}
               onChangeText={setChatInput}
-              placeholder={t('analysisResults.askFollowUp', 'Ask a follow-up…')}
+              placeholder={t('analysisResults.askFollowUp')}
               placeholderTextColor="#9aa0a6"
             />
             <TouchableOpacity

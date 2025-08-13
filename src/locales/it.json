@@ -86,6 +86,7 @@
   "alerts": {
     "error": "Errore",
     "uploadError": "Errore di Caricamento",
+    "uploadErrorTitle": "Errore di caricamento",
     "analysisError": "Errore di Analisi",
     "noDocuments": "Nessun Documento",
     "privacyPolicy": "Informativa sulla Privacy",
@@ -99,7 +100,19 @@
     "analysisFailed": "Analisi fallita.",
     "privacyPolicyMessage": "Questo navigherebbe alla schermata Informativa sulla Privacy o aprirebbe un URL.",
     "termsOfServiceMessage": "Questo navigherebbe alla schermata Termini di Servizio o aprirebbe un URL.",
-    "cancelSubscriptionMessage": "Questo navigherebbe alla schermata di gestione abbonamento."
+    "cancelSubscriptionMessage": "Questo navigherebbe alla schermata di gestione abbonamento.",
+    "clipboardErrorTitle": "Errore degli appunti",
+    "clipboardErrorMessage": "Impossibile leggere gli appunti.",
+    "permissionRequiredTitle": "Autorizzazione necessaria",
+    "cameraPermissionMessage": "Abbiamo bisogno dei permessi della fotocamera.",
+    "galleryPermissionMessage": "Abbiamo bisogno dei permessi della galleria.",
+    "uploadWarningTitle": "Avviso di caricamento",
+    "photoUploadWarning": "Foto salvata localmente ma non caricata nel cloud. Puoi comunque analizzarla, ma potrebbe non essere disponibile in seguito.",
+    "documentUploadWarning": "Documento \"{{name}}\" salvato localmente ma non caricato nel cloud. Puoi comunque analizzarlo, ma potrebbe non essere disponibile in seguito.",
+    "storageWarningTitle": "Avviso di archiviazione",
+    "storageWarningMessage": "Documento rimosso dal dispositivo ma non è stato possibile eliminarlo dallo storage cloud. Il file potrebbe esistere ancora nel cloud.",
+    "storageErrorTitle": "Errore di archiviazione",
+    "storageErrorMessage": "Documento rimosso dal dispositivo ma si è verificato un errore durante l’eliminazione dallo storage cloud."
   },
   "login": {
     "signIn": "Accedi",
@@ -125,7 +138,12 @@
     "ok": "OK"
   },
   "analysisResults": {
-    "title": "Risultati dell'Analisi",
+    "title": "Risultati dell’analisi",
+    "viewLast": "Vedi risultato",
+    "close": "Chiudi",
+    "askFollowUp": "Domanda di approfondimento…",
+    "noResult": "Nessun contenuto restituito.",
+    "simulatedAnswer": "Ecco un ulteriore spunto basato sulla tua domanda.",
     "noPdfAvailable": "Nessun PDF disponibile",
     "noPdfAvailableMessage": "Questa analisi non ha un file PDF associato.",
     "failedToLoadPdf": "Impossibile caricare PDF. Riprova.",
@@ -145,5 +163,20 @@
     "counters": "Caratteri: {{chars}} · Parole: {{words}} · Pagine stimate: {{pages}}",
     "clipboardEmpty": "Gli appunti sono vuoti",
     "tooLarge": "Il testo supera il numero massimo di pagine per documento."
+  },
+  "actions": { "remove": "Rimuovi" },
+  "home": { "items": "Elementi", "actions": { "paste": "Incolla", "file": "File", "photo": "Foto" } },
+  "document": { "defaultName": "Documento" },
+  "image": { "defaultName": "Immagine galleria" },
+  "qa": { "question": "D", "answer": "R" }
+  ,
+  "plan": {
+    "unlimited": "Illimitato",
+    "expired": "Abbonamento scaduto",
+    "statusUnknown": "Stato del piano non disponibile",
+    "freeTrial_one": "Prova gratuita – {{count}} pagina rimanente",
+    "freeTrial_other": "Prova gratuita – {{count}} pagine rimanenti",
+    "pagesLeft_one": "{{count}} pagina rimanente",
+    "pagesLeft_other": "{{count}} pagine rimanenti"
   }
 } 

@@ -1,4 +1,5 @@
 import { supabase } from './supabase';
+import { TFunction } from 'i18next';
 
 export interface UserPlanInfo {
   planName: string;
@@ -170,14 +171,33 @@ export function formatDate(dateString: string | null): string {
  * @param planInfo - User plan information
  * @returns Formatted display text
  */
-export function getHomeScreenDisplayText(planInfo: UserPlanInfo): string {
-  if (planInfo.planType === 'free_trial') {
-    return `Free Trial – ${planInfo.remainingPages} pages left`;
-  } else if (planInfo.planType === 'subscription') {
-    return `Remaining analyses: ${planInfo.remainingPages}`;
-  } else if (planInfo.planType === 'pack') {
-    return `Remaining analyses: ${planInfo.remainingPages}`;
-  } else {
-    return 'No active plan – Free Trial available';
+export function getHomeScreenDisplayText(plan: UserPlanInfo, t: TFunction): string {
+  try {
+    // Unlimited plans (if supported)
+    // If you later add plan.isUnlimited, this will handle it
+    // @ts-ignore optional flag
+    if ((plan as any).isUnlimited) {
+      return t('plan.unlimited');
+    }
+
+    // Free trial pluralized
+    if (plan.planType === 'free_trial') {
+      return t('plan.freeTrial', { count: plan.remainingPages ?? 0 });
+    }
+
+    // Remaining pages pluralized
+    if (typeof plan.remainingPages === 'number') {
+      return t('plan.pagesLeft', { count: plan.remainingPages });
+    }
+
+    // Subscription expired (if supported)
+    // @ts-ignore optional flag
+    if ((plan as any).subscriptionExpired) {
+      return t('plan.expired');
+    }
+
+    return t('plan.statusUnknown');
+  } catch {
+    return t('plan.statusUnknown');
   }
-} 
+}

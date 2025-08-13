@@ -86,6 +86,7 @@
   "alerts": {
     "error": "Lỗi",
     "uploadError": "Lỗi Tải lên",
+    "uploadErrorTitle": "Lỗi tải lên",
     "analysisError": "Lỗi Phân tích",
     "noDocuments": "Không có Tài liệu",
     "privacyPolicy": "Chính sách Bảo mật",
@@ -99,7 +100,19 @@
     "analysisFailed": "Phân tích thất bại.",
     "privacyPolicyMessage": "Điều này sẽ điều hướng đến màn hình Chính sách Bảo mật hoặc mở URL.",
     "termsOfServiceMessage": "Điều này sẽ điều hướng đến màn hình Điều khoản Dịch vụ hoặc mở URL.",
-    "cancelSubscriptionMessage": "Điều này sẽ điều hướng đến màn hình quản lý đăng ký."
+    "cancelSubscriptionMessage": "Điều này sẽ điều hướng đến màn hình quản lý đăng ký.",
+    "clipboardErrorTitle": "Lỗi bảng tạm",
+    "clipboardErrorMessage": "Không thể đọc bảng tạm.",
+    "permissionRequiredTitle": "Cần quyền",
+    "cameraPermissionMessage": "Cần quyền máy ảnh để hoạt động.",
+    "galleryPermissionMessage": "Cần quyền thư viện ảnh để hoạt động.",
+    "uploadWarningTitle": "Cảnh báo tải lên",
+    "photoUploadWarning": "Ảnh đã lưu cục bộ nhưng tải lên đám mây thất bại. Vẫn có thể phân tích, nhưng có thể không còn sẵn sau này.",
+    "documentUploadWarning": "Tài liệu \"{{name}}\" đã lưu cục bộ nhưng tải lên đám mây thất bại. Vẫn có thể phân tích, nhưng có thể không còn sẵn sau này.",
+    "storageWarningTitle": "Cảnh báo lưu trữ",
+    "storageWarningMessage": "Tài liệu đã xóa khỏi thiết bị của bạn nhưng không xóa được khỏi lưu trữ đám mây. Tệp có thể vẫn tồn tại trên đám mây.",
+    "storageErrorTitle": "Lỗi lưu trữ",
+    "storageErrorMessage": "Tài liệu đã xóa khỏi thiết bị của bạn nhưng xảy ra lỗi khi xóa khỏi lưu trữ đám mây."
   },
   "login": {
     "signIn": "Đăng nhập",
@@ -125,7 +138,12 @@
     "ok": "OK"
   },
   "analysisResults": {
-    "title": "Kết quả Phân tích",
+    "title": "Kết quả phân tích",
+    "viewLast": "Xem kết quả",
+    "close": "Đóng",
+    "askFollowUp": "Hỏi thêm…",
+    "noResult": "Không có nội dung trả về.",
+    "simulatedAnswer": "Dưới đây là gợi ý bổ sung dựa trên câu hỏi của bạn.",
     "noPdfAvailable": "Không có PDF khả dụng",
     "noPdfAvailableMessage": "Phân tích này không có tệp PDF liên quan.",
     "failedToLoadPdf": "Không thể tải PDF. Vui lòng thử lại.",
@@ -145,5 +163,20 @@
     "counters": "Ký tự: {{chars}} · Từ: {{words}} · Số trang ước tính: {{pages}}",
     "clipboardEmpty": "Bảng tạm trống",
     "tooLarge": "Văn bản vượt quá số trang tối đa cho mỗi tài liệu."
+  },
+  "actions": { "remove": "Xóa" },
+  "home": { "items": "Mục", "actions": { "paste": "Dán", "file": "Tệp", "photo": "Ảnh" } },
+  "document": { "defaultName": "Tài liệu" },
+  "image": { "defaultName": "Ảnh trong thư viện" },
+  "qa": { "question": "H", "answer": "Đ" }
+  ,
+  "plan": {
+    "unlimited": "Không giới hạn",
+    "expired": "Gói đã hết hạn",
+    "statusUnknown": "Không có thông tin gói",
+    "freeTrial_one": "Dùng thử – còn {{count}} trang",
+    "freeTrial_other": "Dùng thử – còn {{count}} trang",
+    "pagesLeft_one": "Còn {{count}} trang",
+    "pagesLeft_other": "Còn {{count}} trang"
   }
 } 

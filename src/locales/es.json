@@ -86,6 +86,7 @@
   "alerts": {
     "error": "Error",
     "uploadError": "Error de Carga",
+    "uploadErrorTitle": "Error de carga",
     "analysisError": "Error de Análisis",
     "noDocuments": "Sin Documentos",
     "privacyPolicy": "Política de Privacidad",
@@ -99,7 +100,19 @@
     "analysisFailed": "El análisis falló.",
     "privacyPolicyMessage": "Esto navegaría a la pantalla de Política de Privacidad o abriría una URL.",
     "termsOfServiceMessage": "Esto navegaría a la pantalla de Términos de Servicio o abriría una URL.",
-    "cancelSubscriptionMessage": "Esto navegaría a la pantalla de gestión de suscripción."
+    "cancelSubscriptionMessage": "Esto navegaría a la pantalla de gestión de suscripción.",
+    "clipboardErrorTitle": "Error del portapapeles",
+    "clipboardErrorMessage": "No se pudo leer el portapapeles.",
+    "permissionRequiredTitle": "Permiso requerido",
+    "cameraPermissionMessage": "Necesitamos permisos de cámara para que esto funcione.",
+    "galleryPermissionMessage": "Necesitamos permisos de galería para que esto funcione.",
+    "uploadWarningTitle": "Advertencia de carga",
+    "photoUploadWarning": "La foto se guardó localmente pero no se pudo cargar a la nube. Aún puedes analizarla, pero puede que no esté disponible más tarde.",
+    "documentUploadWarning": "El documento \"{{name}}\" se guardó localmente pero no se pudo cargar a la nube. Aún puedes analizarlo, pero puede que no esté disponible más tarde.",
+    "storageWarningTitle": "Advertencia de almacenamiento",
+    "storageWarningMessage": "Documento eliminado de tu dispositivo pero no se pudo borrar del almacenamiento en la nube. Es posible que el archivo aún exista en la nube.",
+    "storageErrorTitle": "Error de almacenamiento",
+    "storageErrorMessage": "Documento eliminado de tu dispositivo pero ocurrió un error al borrarlo del almacenamiento en la nube."
   },
   "login": {
     "signIn": "Iniciar Sesión",
@@ -126,6 +139,11 @@
   },
   "analysisResults": {
     "title": "Resultados del Análisis",
+    "viewLast": "Ver resultado",
+    "close": "Cerrar",
+    "askFollowUp": "Pregunta de seguimiento…",
+    "noResult": "No se devolvió contenido.",
+    "simulatedAnswer": "Aquí tienes un aporte adicional basado en tu pregunta.",
     "noPdfAvailable": "No hay PDF disponible",
     "noPdfAvailableMessage": "Este análisis no tiene un archivo PDF asociado.",
     "failedToLoadPdf": "Error al cargar PDF. Inténtalo de nuevo.",
@@ -145,5 +163,20 @@
     "counters": "Caracteres: {{chars}} · Palabras: {{words}} · Páginas estimadas: {{pages}}",
     "clipboardEmpty": "El portapapeles está vacío",
     "tooLarge": "El texto supera el número máximo de páginas por documento."
+  },
+  "actions": { "remove": "Eliminar" },
+  "home": { "items": "Elementos", "actions": { "paste": "Pegar", "file": "Archivo", "photo": "Foto" } },
+  "document": { "defaultName": "Documento" },
+  "image": { "defaultName": "Imagen de galería" },
+  "qa": { "question": "P", "answer": "R" }
+  ,
+  "plan": {
+    "unlimited": "Ilimitado",
+    "expired": "Suscripción vencida",
+    "statusUnknown": "Estado del plan no disponible",
+    "freeTrial_one": "Prueba gratuita – queda {{count}} página",
+    "freeTrial_other": "Prueba gratuita – quedan {{count}} páginas",
+    "pagesLeft_one": "Queda {{count}} página",
+    "pagesLeft_other": "Quedan {{count}} páginas"
   }
 } 
